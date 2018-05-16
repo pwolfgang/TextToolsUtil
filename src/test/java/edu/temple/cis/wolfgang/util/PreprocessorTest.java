@@ -66,15 +66,16 @@ public class PreprocessorTest {
     @Test
     public void testPreprocess() {
         System.out.println("preprocess");
-        String line1 = "The quick brown fox can't jump";
+        String line1 = "'The quick brown fox can't jump'";
         List<String> expResult1 = 
-                new ArrayList<>(Arrays.asList("the", "quick", "brown", "fox", "can't", "jump"));
+                Arrays.asList("quick", "brown", "fox", "jump");
         String line2 = "Proposición de Ley sobre";
         List<String> expResult2 =
-                new ArrayList<>(Arrays.asList("proposición", "de", "ley", "sobre"));
-        Preprocessor instance = new Preprocessor("false", "false");
-        List<String> result1 = instance.preprocess(line1);
-        List<String> result2 = instance.preprocess(line2);
+                Arrays.asList("proposición", "ley", "sobr");
+        Preprocessor instance1 = new Preprocessor("porter", "english");
+        Preprocessor instance2 = new Preprocessor("french", "french");
+        List<String> result1 = instance1.preprocess(line1);
+        List<String> result2 = instance2.preprocess(line2);
         assertEquals(expResult1, result1);
         assertEquals(expResult2, result2);
     }
