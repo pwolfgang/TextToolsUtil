@@ -317,8 +317,8 @@ public class Util {
      * feature number followed by a colon and then a feature value
      * @param out The print writer to write the line to
      * @param value The value of this instance
-     * @param instance The SortedMap containng the features
-     * @throws java.io.IOException
+     * @param instance The SortedMap containing the features
+     * @throws java.io.IOException If error in writing file.
      */
     public static void writeFeatureLine(
             PrintWriter out,
