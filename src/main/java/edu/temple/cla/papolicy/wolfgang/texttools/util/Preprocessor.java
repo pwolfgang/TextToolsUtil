@@ -31,11 +31,11 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import edu.temple.cla.papolicy.wolfgang.stemmerfactory.StemmerFactory;
+import edu.temple.cla.papolicy.wolfgang.stemmer.Stemmer;
+import edu.temple.cla.papolicy.wolfgang.stemmer.StemmerFactory;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.tartarus.snowball.javastemmers.SnowballStemmer;
 
 /**
  *
@@ -44,7 +44,7 @@ import org.tartarus.snowball.javastemmers.SnowballStemmer;
 public class Preprocessor {
 
     private static final Pattern NOT_WORD = Pattern.compile("[^\\p{L}']+");
-    private final SnowballStemmer stemmer;
+    private final Stemmer stemmer;
     private final StopWord stopWord;
 
     /**
@@ -69,28 +69,20 @@ public class Preprocessor {
     public List<String> preprocess(String line) {
         return NOT_WORD.splitAsStream(line)
                 .map(String::toLowerCase)
-                .map(w -> {
-                    if (w.startsWith("'")) {
-                        return w.substring(1);
-                    } else {
-                        return w;
-                    }
-                })
-                .map(w -> {
-                    if (w.endsWith("'")) {
-                        return w.substring(0, w.length() - 1);
-                    } else {
-                        return w;
-                    }
-                })
+                .map(this::stripSingleQuotes)
                 .filter(w -> !w.isEmpty())
                 .filter(w -> !stopWord.isStopWord(w))
-                .map(w -> {
-                    stemmer.setCurrent(w);
-                    stemmer.stem();
-                    return stemmer.getCurrent().trim();
-                })
+                .map(stemmer)
                 .filter(w -> !w.isEmpty())
                 .collect(Collectors.toList());
+    }
+    
+    private String stripSingleQuotes(String s) {
+        char[] chars = s.toCharArray();
+        int firstIndex = 0;
+        int lastIndex = chars.length - 1;
+        if (chars[0] == '\'') firstIndex = 1;
+        if (chars[lastIndex] == '\'') lastIndex--;
+        return new String(chars, firstIndex, lastIndex - firstIndex + 1);
     }
 }

@@ -48,9 +48,9 @@ public class SimpleDataSource {
      * Initializes the data source.
      *
      * @param fileName the name of the property file that contains the database
-     * driver, URL, username, and password Or is the Name of an ODBC datasource.
-     * @throws java.io.IOException
-     * @throws java.lang.ClassNotFoundException
+     * driver, URL, username, and password.
+     * @throws java.io.IOException Loading the properties.
+     * @throws java.lang.ClassNotFoundException Error in locating driver.
      */
     public SimpleDataSource(String fileName)
             throws IOException, ClassNotFoundException {
@@ -77,7 +77,7 @@ public class SimpleDataSource {
      * Gets a connection to the database.
      *
      * @return the database connection
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException If the username/password not recognized.
      */
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, username.trim(), password.trim());
