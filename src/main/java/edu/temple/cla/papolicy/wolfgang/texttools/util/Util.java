@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -56,6 +57,7 @@ import java.util.TreeMap;
  */
 public class Util {
     
+    private static final Logger LOGGER = Logger.getLogger(Util.class);
     private static final double LOGE2 = Math.log(2.0);
     private static final Map<Character, String> XML_CHAR_MAP = new HashMap<>();
     private static final Map<String, Character> XML_CODE_MAP = new HashMap<>();
@@ -87,16 +89,16 @@ public class Util {
         ref.clear();
         try (BufferedReader in = 
                 new BufferedReader(new FileReader(inputFileName))) {
-            String line;
-            while ((line = in.readLine()) != null) {
+            in.lines().forEach(line -> {
                 String[] tokens = line.split("\\s*\\|\\s*");
                 if (tokens.length >= 2) {
                     ref.add(tokens[0].trim());
                     lines.add(tokens[1].trim());
                 }
-            }
+            });
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("Error reading from file", ex);
+            System.err.printf("Error reading from file %s%n", ex.getMessage());
             System.exit(1);
         }
     }
@@ -136,37 +138,36 @@ public class Util {
             tableName + ")";
         try {
             SimpleDataSource sds = new SimpleDataSource(datasource);
-            Connection conn = sds.getConnection();
-            Statement stmt = conn.createStatement();
-            System.out.println(query);
-            ResultSet rs = stmt.executeQuery(query);
-            int counter = -1;
-            while (rs.next()) {
-                ++counter;
-                if ((!useEven && ! useOdd) ||
-                        (useEven && counter % 2 == 0) ||
-                        (useOdd && counter %2 == 1)) {
-                    String theID = rs.getString("theID");
-                    String theText = rs.getString("theText");
-                    theText = convertFromXML(theText);
-                    int code = rs.getInt("theCode");
-                    if (theID != null) {
-                        id.add(theID);
-                        if (theText == null) {
-                            lines.add("");
-                        } else {
-                            lines.add(theText);
+            try (Connection conn = sds.getConnection(); 
+                    Statement stmt = conn.createStatement(); 
+                    ResultSet rs = stmt.executeQuery(query)) {
+                System.out.println(query);
+                int counter = -1;
+                while (rs.next()) {
+                    ++counter;
+                    if ((!useEven && ! useOdd) ||
+                            (useEven && counter % 2 == 0) ||
+                            (useOdd && counter %2 == 1)) {
+                        String theID = rs.getString("theID");
+                        String theText = rs.getString("theText");
+                        theText = convertFromXML(theText);
+                        int code = rs.getInt("theCode");
+                        if (theID != null) {
+                            id.add(theID);
+                            if (theText == null) {
+                                lines.add("");
+                            } else {
+                                lines.add(theText);
+                            }
+                            if (computeMajor) code = code / 100;
+                            ref.add(Integer.toString(code));
                         }
-                        if (computeMajor) code = code / 100;
-                        ref.add(Integer.toString(code));
                     }
                 }
             }
-            rs.close();
-            stmt.close();
-            conn.close();
         } catch (Exception ex) { // Want to catch unchecked exceptions as well
-            ex.printStackTrace();
+            LOGGER.error("Error reading from database", ex);
+            System.err.printf("Error reading from database %s%n", ex.getMessage());
             System.exit(1);
         }
     }
@@ -213,48 +214,47 @@ public class Util {
             tableName + ")";
         try {
             SimpleDataSource sds = new SimpleDataSource(datasource);
-            Connection conn = sds.getConnection();
-            Statement stmt = conn.createStatement();
-            System.out.println(query);
-            ResultSet rs = stmt.executeQuery(query);
-            int counter = -1;
-            while (rs.next()) {
-                ++counter;
-                if ((!useEven && ! useOdd) ||
-                        (useEven && counter % 2 == 0) ||
-                        (useOdd && counter %2 == 1)) {
-                    String theID = rs.getString("theID");
-                    String theText = rs.getString("theText");
-                    theText = convertFromXML(theText);
-                    int code = rs.getInt("theCode");
-                    String theCluster = rs.getString("theCluster");
-                    if (theID != null) {
-                        id.add(theID);
-                        if (theText == null) {
-                            lines.add("");
-                        } else {
-                            lines.add(theText);
-                        }
-                        if (computeMajor) code = code / 100;
-                        ref.add(Integer.toString(code));
-                        if (theCluster == null) {
-                            cluster.add(null);
-                        } else {
-                            try {
-                                int intCluster = Integer.parseInt(theCluster);
-                                cluster.add(intCluster);
-                            } catch (NumberFormatException ex) {
-                                // ignore this
+            try (Connection conn = sds.getConnection(); 
+                    Statement stmt = conn.createStatement(); 
+                    ResultSet rs = stmt.executeQuery(query)) {
+                System.out.println(query);
+                int counter = -1;
+                while (rs.next()) {
+                    ++counter;
+                    if ((!useEven && ! useOdd) ||
+                            (useEven && counter % 2 == 0) ||
+                            (useOdd && counter %2 == 1)) {
+                        String theID = rs.getString("theID");
+                        String theText = rs.getString("theText");
+                        theText = convertFromXML(theText);
+                        int code = rs.getInt("theCode");
+                        String theCluster = rs.getString("theCluster");
+                        if (theID != null) {
+                            id.add(theID);
+                            if (theText == null) {
+                                lines.add("");
+                            } else {
+                                lines.add(theText);
+                            }
+                            if (computeMajor) code = code / 100;
+                            ref.add(Integer.toString(code));
+                            if (theCluster == null) {
+                                cluster.add(null);
+                            } else {
+                                try {
+                                    int intCluster = Integer.parseInt(theCluster);
+                                    cluster.add(intCluster);
+                                } catch (NumberFormatException ex) {
+                                    // ignore this
+                                }
                             }
                         }
                     }
                 }
             }
-            rs.close();
-            stmt.close();
-            conn.close();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("Error reading from database", ex);
+            System.err.printf("Error reading from database %s%n", ex.getMessage());
             System.exit(1);
         }
     }
@@ -267,19 +267,18 @@ public class Util {
             List<String> ids, 
             List<Integer> cluster) throws Exception {
         SimpleDataSource sds = new SimpleDataSource(datasource);
-        Connection conn = sds.getConnection();
-        String query = "update " + tableName + " set " + clusterColumn + "=? where " + idColumn + "=?";
-        PreparedStatement stmt = conn.prepareStatement(query);
-        for (int i = 0; i < ids.size(); i++) {
-            Integer newClusterValue = cluster.get(i);
-            if (newClusterValue != null) {
-                stmt.setInt(1, newClusterValue);
-                stmt.setString(2, ids.get(i));
-                stmt.executeUpdate();
+            String query = "update " + tableName + " set " + clusterColumn + "=? where " + idColumn + "=?";
+        try (Connection conn = sds.getConnection(); 
+                PreparedStatement stmt = conn.prepareStatement(query)) {
+            for (int i = 0; i < ids.size(); i++) {
+                Integer newClusterValue = cluster.get(i);
+                if (newClusterValue != null) {
+                    stmt.setInt(1, newClusterValue);
+                    stmt.setString(2, ids.get(i));
+                    stmt.executeUpdate();
+                }
             }
         }
-        stmt.close();
-        conn.close();
     }
     
    
@@ -316,16 +315,16 @@ public class Util {
      * (+1, -1, or 0) followed by feature pairs.  Each feature pair is a
      * feature number followed by a colon and then a feature value
      * @param out The print writer to write the line to
-     * @param value The value of this instance
-     * @param instance The SortedMap containing the features
+     * @param value The value of this featureMap
+     * @param featureMap The SortedMap containing the features
      * @throws java.io.IOException If error in writing file.
      */
     public static void writeFeatureLine(
             PrintWriter out,
             int value,
-            SortedMap<Integer, Double> instance) throws IOException {
+            SortedMap<Integer, Double> featureMap) throws IOException {
         out.print(value);
-        instance.forEach((k, v) -> out.print(" " + k + ":" + v));
+        featureMap.forEach((k, v) -> out.print(" " + k + ":" + v));
         out.println();
     }
     

@@ -41,19 +41,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.apache.log4j.Logger;
 
 /**
  * Class to encapsulate the vocabulary
  * @author Paul Wolfgang
  */
-public
-        class Vocabulary implements Serializable {
+public class Vocabulary implements Serializable {
+    
+    private static final Logger LOGGER = Logger.getLogger(Vocabulary.class);
 
     /** List of word probabilities indexed by word id */
     private final ArrayList<Double> allWords;
     /** Map of words to word id */
     private final  Map<String, Integer> wordIds;
-    /** Arraylist of word indexed by word id */
+    /** List of word indexed by word id */
     private final List<String> idWords;
 
     /** WordCounter to accumulate the count of the words */
@@ -152,7 +154,8 @@ public
         try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
             vocab.forEach((k, v) -> pw.printf(format, k,v));
         } catch (IOException ioex) {
-            ioex.printStackTrace();
+            LOGGER.error("Error writing vocabulary", ioex);
+            System.err.printf("Error writing vocabulary %s%n", ioex.getMessage());
             System.exit(1);
         }
     }
