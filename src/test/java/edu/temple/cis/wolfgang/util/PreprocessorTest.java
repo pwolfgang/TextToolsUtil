@@ -32,9 +32,9 @@
 package edu.temple.cis.wolfgang.util;
 
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Preprocessor;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -74,8 +74,8 @@ public class PreprocessorTest {
                 Arrays.asList("proposición", "ley", "sobr");
         Preprocessor instance1 = new Preprocessor("porter", "english");
         Preprocessor instance2 = new Preprocessor("french", "french");
-        List<String> result1 = instance1.preprocess(line1);
-        List<String> result2 = instance2.preprocess(line2);
+        List<String> result1 = instance1.preprocess(line1).collect(Collectors.toList());
+        List<String> result2 = instance2.preprocess(line2).collect(Collectors.toList());
         assertEquals(expResult1, result1);
         assertEquals(expResult2, result2);
     }

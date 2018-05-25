@@ -33,9 +33,10 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import edu.temple.cla.papolicy.wolfgang.stemmer.Stemmer;
 import edu.temple.cla.papolicy.wolfgang.stemmer.StemmerFactory;
-import java.util.List;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -64,17 +65,16 @@ public class Preprocessor {
      * followed by a letter. All words are converted to lower case.
      *
      * @param line The string to be split
-     * @return An array list of stemmed words
+     * @return A stream of stemmed words
      */
-    public List<String> preprocess(String line) {
+    public Stream<String> preprocess(String line) {
         return NOT_WORD.splitAsStream(line)
                 .map(String::toLowerCase)
                 .map(this::stripSingleQuotes)
                 .filter(w -> !w.isEmpty())
                 .filter(w -> !stopWord.isStopWord(w))
                 .map(stemmer)
-                .filter(w -> !w.isEmpty())
-                .collect(Collectors.toList());
+                .filter(w -> !w.isEmpty());
     }
     
     private String stripSingleQuotes(String s) {

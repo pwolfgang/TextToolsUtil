@@ -83,8 +83,8 @@ public class Util {
      */
     public static void readFromFile (
             String inputFileName,
-            ArrayList<String> lines,
-            ArrayList<String> ref) {
+            List<String> lines,
+            List<String> ref) {
         lines.clear();
         ref.clear();
         try (BufferedReader in = 

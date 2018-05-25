@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 
 /**
@@ -79,19 +80,17 @@ public class Vocabulary implements Serializable {
     }
 
     /** Method to add words to the vocabulary and update the counts 
-     * @param words A list of words to be added
+     * @param word A list of words to be added
      */
-    public void updateCounts(List<String> words) {
+    public void updateCounts(String word) {
         if (!frozen) {
-            words.forEach(word ->{
                 Integer thisWordID = wordIds.get(word);
                 if (thisWordID == null) {
                     thisWordID = idWords.size();
                     wordIds.put(word, thisWordID);
                     idWords.add(word);
                 }
-            });
-            counter.updateCounts(words);
+            counter.updateCounts(word);
         }
     }
     

@@ -34,7 +34,6 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -71,20 +70,18 @@ public class WordCounter implements Serializable {
     private int numWords = 0;
 
     /**
-     * Update the counts using the tokens in the input list
+     * Update the count for a word
      *
-     * @param tokens The list of tokens
+     * @param word The list of tokens
      */
-    public void updateCounts(List<String> tokens) {
-        tokens.forEach(token -> {
-            Counter count = wordMap.get(token);
+    public void updateCounts(String word) {
+            Counter count = wordMap.get(word);
             if (count == null) {
                 count = new Counter();
-                wordMap.put(token, count);
+                wordMap.put(word, count);
             }
             count.increment();
             ++numWords;
-        });
     }
 
     /**
