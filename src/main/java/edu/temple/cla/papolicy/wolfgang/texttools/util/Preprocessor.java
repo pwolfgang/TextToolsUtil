@@ -33,8 +33,6 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import edu.temple.cla.papolicy.wolfgang.stemmer.Stemmer;
 import edu.temple.cla.papolicy.wolfgang.stemmer.StemmerFactory;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -69,6 +67,7 @@ public class Preprocessor {
      */
     public Stream<String> preprocess(String line) {
         return NOT_WORD.splitAsStream(line)
+                .filter(w -> !w.isEmpty())
                 .map(String::toLowerCase)
                 .map(this::stripSingleQuotes)
                 .filter(w -> !w.isEmpty())
@@ -83,6 +82,7 @@ public class Preprocessor {
         int lastIndex = chars.length - 1;
         if (chars[0] == '\'') firstIndex = 1;
         if (chars[lastIndex] == '\'') lastIndex--;
+        if (lastIndex < firstIndex) return "";
         return new String(chars, firstIndex, lastIndex - firstIndex + 1);
     }
 }
