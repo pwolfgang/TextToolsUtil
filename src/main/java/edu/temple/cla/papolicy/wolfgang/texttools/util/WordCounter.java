@@ -35,6 +35,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * A class to count words (tokens)
@@ -64,6 +65,10 @@ public class WordCounter implements Serializable {
          */
         public int getCount() {
             return count;
+        }
+        
+        public String toString() {
+            return Integer.toString(count);
         }
     }
     private final Map<String, Counter> wordMap = new HashMap<>();
@@ -116,5 +121,11 @@ public class WordCounter implements Serializable {
      */
     public Set<String> getWords() {
         return wordMap.keySet();
+    }
+    
+    public String toString() {
+        StringJoiner sj = new StringJoiner(", ", "{", "}\n");
+        wordMap.forEach((k, v) -> sj.add(String.format("%s -> %s", k, v)));
+        return sj.toString();
     }
 }

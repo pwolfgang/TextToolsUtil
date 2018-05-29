@@ -40,8 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.StringJoiner;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 
 /**
@@ -157,6 +157,14 @@ public class Vocabulary implements Serializable {
             System.err.printf("Error writing vocabulary %s%n", ioex.getMessage());
             System.exit(1);
         }
+    }
+    
+    public String toString() {
+        StringJoiner sj = new StringJoiner("\n");
+        for (int i = 1; i < idWords.size(); i++) {
+            sj.add(String.format("%4s %10s %f", i, idWords.get(i), allWords.get(i)));
+        }
+        return sj.toString();
     }
 
 }

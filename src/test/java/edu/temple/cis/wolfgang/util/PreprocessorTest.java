@@ -32,8 +32,12 @@
 package edu.temple.cis.wolfgang.util;
 
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Preprocessor;
+import edu.temple.cla.papolicy.wolfgang.texttools.util.Vocabulary;
+import edu.temple.cla.papolicy.wolfgang.texttools.util.WordCounter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.stream.Collectors;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -79,5 +83,32 @@ public class PreprocessorTest {
         assertEquals(expResult1, result1);
         assertEquals(expResult2, result2);
     }
+    
+    @Test
+    public void testCreatingTrainingFeatures() {
+        List<WordCounter> counts = new ArrayList<>();
+        Vocabulary vocabulary = new Vocabulary();
+        List<String> lines = Arrays.asList (
+                "The quick brown fox jumps over the lazy dog.",
+                "Now is the time for all good men to come to the aid of the party.",
+                "The slow brown fox cannot jump over the fast dog.",
+                "It's party time."
+                );
+        Preprocessor preprocessor = new Preprocessor("porter", "english");
+        lines.stream()
+             .map(line -> preprocessor.preprocess(line))
+             .forEach(words -> {
+                WordCounter counter = new WordCounter();
+                words.forEach(word -> {
+                    counter.updateCounts(word);
+                    vocabulary.updateCounts(word);
+                });
+                counts.add(counter);
+            });
+        vocabulary.computeProbabilities();
+        System.out.println(counts);
+        System.out.println(vocabulary);
+    }
+            
 
 }
