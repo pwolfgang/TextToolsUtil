@@ -132,6 +132,10 @@ public class Vocabulary implements Serializable {
     public String getWord(int wordID) {
         return idWords.get(wordID);
     }
+    
+    public int numFeatures() {
+        return idWords.size();
+    }
 
     /**
      * Method to output the Vocabulary in alphabetical order.
