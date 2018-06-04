@@ -47,8 +47,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import libsvm.svm_node;
 import org.apache.log4j.Logger;
+import tw.edu.ntu.csie.libsvm.svm_node;
 
 
 /**

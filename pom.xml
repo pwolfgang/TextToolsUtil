@@ -42,8 +42,8 @@
         </dependency>
         <dependency>
             <groupId>tw.edu.ntu.csie</groupId>
-            <artifactId>libsvm_mod</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>libsvm_java</artifactId>
+            <version>3.17.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
