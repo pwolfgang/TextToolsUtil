@@ -15,6 +15,10 @@
             <id>StemmerFactory</id>
             <url>https://github.com/pwolfgang/StemmerFactory/releases/tag/1.1.0</url>
         </repository>
+        <repository>
+            <id>libsvm_java</id>
+            <url>https://github.com/pwolfgang/libsvm_java/releases/tag/3.17.1</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -43,7 +47,7 @@
         <dependency>
             <groupId>tw.edu.ntu.csie</groupId>
             <artifactId>libsvm_java</artifactId>
-            <version>3.17.1-SNAPSHOT</version>
+            <version>3.17.1</version>
         </dependency>
     </dependencies>
     <build>
