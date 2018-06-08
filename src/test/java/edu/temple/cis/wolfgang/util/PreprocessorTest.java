@@ -32,6 +32,9 @@
 package edu.temple.cis.wolfgang.util;
 
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Preprocessor;
+import edu.temple.cla.papolicy.wolfgang.texttools.util.Vocabulary;
+import edu.temple.cla.papolicy.wolfgang.texttools.util.WordCounter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,5 +82,54 @@ public class PreprocessorTest {
         assertEquals(expResult1, result1);
         assertEquals(expResult2, result2);
     }
+    
+    @Test
+    public void testCreatingTrainingFeatures() {
+        List<WordCounter> counts = new ArrayList<>();
+        Vocabulary vocabulary = new Vocabulary();
+        List<String> lines = Arrays.asList (
+                "The quick brown fox jumps over the lazy dog.",
+                "Now is the time for all good men to come to the aid of the party.",
+                "The slow brown fox cannot jump over the fast dog.",
+                "It's party time."
+                );
+        Preprocessor preprocessor = new Preprocessor("porter", "english");
+        lines.stream()
+             .map(line -> preprocessor.preprocess(line))
+             .forEach(words -> {
+                WordCounter counter = new WordCounter();
+                words.forEach(word -> {
+                    counter.updateCounts(word);
+                    vocabulary.updateCounts(word);
+                });
+                counts.add(counter);
+            });
+        vocabulary.computeProbabilities();
+        String wordCounterExpected = 
+                "[{quick -> 1, lazi -> 1, brown -> 1, dog -> 1, fox -> 1, jump -> 1}\n" +
+               ", {now -> 1, men -> 1, come -> 1, time -> 1, good -> 1, aid -> 1, parti -> 1}\n" +
+               ", {fast -> 1, slow -> 1, brown -> 1, dog -> 1, fox -> 1, jump -> 1}\n" +
+               ", {time -> 1, parti -> 1}\n" +
+                "]";
+        String vocabularyExpected = 
+                "   1      quick 0.047619\n" +
+                "   2      brown 0.095238\n" +
+                "   3        fox 0.095238\n" +
+                "   4       jump 0.095238\n" +
+                "   5       lazi 0.047619\n" +
+                "   6        dog 0.095238\n" +
+                "   7        now 0.047619\n" +
+                "   8       time 0.095238\n" +
+                "   9       good 0.047619\n" +
+                "  10        men 0.047619\n" +
+                "  11       come 0.047619\n" +
+                "  12        aid 0.047619\n" +
+                "  13      parti 0.095238\n" +
+                "  14       slow 0.047619\n" +
+                "  15       fast 0.047619";
+        assertEquals(wordCounterExpected, counts.toString());
+        assertEquals(vocabularyExpected, vocabulary.toString());
+    }
+            
 
 }
