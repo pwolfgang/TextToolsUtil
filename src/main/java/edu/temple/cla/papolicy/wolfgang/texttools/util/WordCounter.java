@@ -67,6 +67,11 @@ public class WordCounter implements Serializable {
             return count;
         }
         
+        /**
+         * Return the count as a string.
+         * @return The count converted to a string.
+         */
+        @Override
         public String toString() {
             return Integer.toString(count);
         }
@@ -123,6 +128,11 @@ public class WordCounter implements Serializable {
         return wordMap.keySet();
     }
     
+    /**
+     * Create a string representation of this WordCounter object.
+     * @return A list of each word followed by the number of times it appears.
+     */
+    @Override
     public String toString() {
         StringJoiner sj = new StringJoiner(", ", "{", "}\n");
         wordMap.forEach((k, v) -> sj.add(String.format("%s -> %s", k, v)));

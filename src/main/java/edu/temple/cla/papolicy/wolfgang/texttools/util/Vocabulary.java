@@ -163,6 +163,13 @@ public class Vocabulary implements Serializable {
         }
     }
     
+    /**
+     * Create a string representation of this vocabulary object. The string
+     * representation is a listing of each word id followed by the word and
+     * its probability.
+     * @return String representation of this vocabulary object.
+     */
+    @Override
     public String toString() {
         StringJoiner sj = new StringJoiner("\n");
         for (int i = 1; i < idWords.size(); i++) {

@@ -47,7 +47,7 @@ public class Preprocessor {
     private final StopWord stopWord;
 
     /**
-     * The constuctor.
+     * The constructor..
      * @param stemmerLanguage Language to be used for stemming.
      * @param stopWordLanguage Language to be used to find stop words.
      */

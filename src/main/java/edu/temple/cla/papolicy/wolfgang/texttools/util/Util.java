@@ -467,9 +467,8 @@ public class Util {
      /**
       * Method to convert an attributeSet to an array of svm_node.
       * @param attributeSet The attribute set to be converted
-      * @return The equivalend array of svm_node.
-      */
-     
+      * @return The equivalent array of svm_node.
+      */    
      public static svm_node[] convereToSVMNode(SortedMap<Integer, Double> attributeSet) {
         List<svm_node> svm_node_list = new ArrayList<>();
         attributeSet.forEach((Integer k, Double v) -> {
