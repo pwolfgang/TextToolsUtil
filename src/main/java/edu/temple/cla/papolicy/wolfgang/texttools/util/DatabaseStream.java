@@ -43,11 +43,16 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- *
+ * Convert a ResultSet into a Stream. The resulting Stream consists of
+ * Map&lt;String, Object&gt; object for each row where the key is the column 
+ * label and the value is the value.
  * @author Paul Wolfgang
  */
 public class DatabaseStream {
 
+    /**
+     * An iterator over the rows of a ResultSet.
+     */
     private static class ResultSetIterator implements Iterator<Map<String, Object>> {
 
         private ResultSet rs;
@@ -55,6 +60,12 @@ public class DatabaseStream {
         private boolean thereIsANext;
         private ResultSetMetaData rsMetaData;
 
+        /** 
+         * Constructor.
+         * The constructor initializes the iterator by getting the MetaData from
+         * the ResultSet and initializing the state variables.
+         * @param rs 
+         */
         public ResultSetIterator(ResultSet rs) {
             try {
                 this.rs = rs;
@@ -66,6 +77,15 @@ public class DatabaseStream {
             }
         }
 
+        /**
+         * Determine if there is a next row.
+         * This method calls the ResultSet next method if the Iterator next
+         * method has not been called. If the ResultSet next method returns 
+         * false, then thereIsANext is set false and false is returned. Otherwise,
+         * thereIsANext is set true and true is returned. In both cases
+         * nextCalled is set true.
+         * @return true if there is a call to next will succeed.
+         */
         @Override
         public boolean hasNext() {
             try {
@@ -87,6 +107,12 @@ public class DatabaseStream {
             }
         }
 
+        /**
+         * Retrieve the next row from the ResultSet.
+         * A new LinkedHashMap is created and the value of each column
+         * as defined by the ResultSetMetaData is placed into the map.
+         * @return a Map representation of the row&apos;s content.
+         */
         @Override
         public Map<String, Object> next() {
             if (!hasNext()) {
@@ -109,6 +135,11 @@ public class DatabaseStream {
 
     }
 
+    /**
+     * Create a stream from a ResultSet
+     * @param rs The input ResultSet
+     * @return A Stream that returns each row of the ResultSet as a Map.
+     */
     public static Stream<Map<String, Object>> of(ResultSet rs) {
         Iterator<Map<String, Object>> iterator = new ResultSetIterator(rs);
         Spliterator<Map<String, Object>> spliterator
