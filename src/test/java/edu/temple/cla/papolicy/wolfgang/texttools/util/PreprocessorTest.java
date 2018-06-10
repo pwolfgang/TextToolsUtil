@@ -29,7 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package edu.temple.cis.wolfgang.util;
+package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Preprocessor;
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Vocabulary;

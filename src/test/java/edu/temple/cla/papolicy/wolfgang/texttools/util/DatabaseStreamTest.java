@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2018, Temple University
  * All rights reserved.
  *
@@ -29,68 +29,69 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package edu.temple.cis.wolfgang.util;
+package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import edu.temple.cla.papolicy.wolfgang.texttools.util.StopWord;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
- * @author Paul Wolfgang
+ * @author Paul
  */
-public class StopWordTest {
+public class DatabaseStreamTest {
 
-    private final StopWord stopWord;
-
-    public StopWordTest() {
-        stopWord = new StopWord("English");
+    public DatabaseStreamTest() {
     }
-
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void beforeClass() {
+        TestDatabase.createTestTable();
     }
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
 
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of isStopWord method, of class StopWord.
-     * yourself is a stop word
-     */
     @Test
-    public void testIsStopWord1() {
-        System.out.println("isStopWord1");
-        String word = "yourself";
-        boolean expResult = true;
-        boolean result = stopWord.isStopWord(word);
-        assertEquals(expResult, result);
+    public void testOf() {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/PAPolicy", "paul", "secret");
+                Statement stmt = conn.createStatement();) {
+            ResultSet rs = stmt.executeQuery("SELECT ID, Abstract, Code from TestTable");
+            List<Map<String, Object>> result = new ArrayList<>();
+            DatabaseStream.of(rs)
+                    .forEach(result::add);
+            List<Map<String, Object>> expected = TestDatabase.buildExpectedResult();
+            assertTrue(compareLists(expected, result));
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+
+    }
+    
+    
+    private boolean compareLists(List<?> list1, List<?> list2) {
+        if (list1.size() != list2.size()) {
+            System.err.println("Lists are of different size");
+        }
+        for (int i = 0; i < list1.size(); i++) {
+            Object o1 = list1.get(i);
+            Object o2 = list2.get(i);
+            if (!Objects.equals(o1, o2)) {
+                System.err.println("At item " + 1);
+                System.err.println(o1);
+                System.err.println(o2);
+                return false;
+            }
+        }
+        return true;
     }
 
-    /**
-     * Test of isStopWord method, of class StopWord.
-     * arf is not a stop word
-     */
-    @Test
-    public void testIsStopWord2() {
-        System.out.println("isStopWord2");
-        String word = "arf";
-        boolean expResult = false;
-        boolean result = stopWord.isStopWord(word);
-        assertEquals(expResult, result);
-    }
 }

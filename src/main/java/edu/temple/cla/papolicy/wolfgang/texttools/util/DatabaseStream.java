@@ -31,10 +31,91 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 /**
  *
- * @author Paul
+ * @author Paul Wolfgang
  */
 public class DatabaseStream {
+
+    private static class ResultSetIterator implements Iterator<Map<String, Object>> {
+
+        private ResultSet rs;
+        private boolean nextCalled;
+        private boolean thereIsANext;
+        private ResultSetMetaData rsMetaData;
+
+        public ResultSetIterator(ResultSet rs) {
+            try {
+                this.rs = rs;
+                rsMetaData = rs.getMetaData();
+                nextCalled = false;
+                thereIsANext = false;
+            } catch (Exception ex) {
+                throw new RuntimeException("Error in constructor call", ex);
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            try {
+                if (nextCalled) {
+                    return thereIsANext;
+                } else {
+                    if (rs.next()) {
+                        nextCalled = true;
+                        thereIsANext = true;
+                        return true;
+                    } else {
+                        nextCalled = true;
+                        thereIsANext = false;
+                        return false;
+                    }
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException("Error in calling next", ex);
+            }
+        }
+
+        @Override
+        public Map<String, Object> next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            try {
+                Map<String, Object> result = new LinkedHashMap<>();
+                int numColumns = rsMetaData.getColumnCount();
+                for (int i = 1; i <= numColumns; i++) {
+                    String columnName = rsMetaData.getColumnName(i);
+                    Object columnValue = rs.getObject(i);
+                    result.put(columnName, columnValue);
+                }
+                nextCalled = false;
+                return result;
+            } catch (Exception ex) {
+                throw new RuntimeException("Error in reading row", ex);
+            }
+        }
+
+    }
+
+    public static Stream<Map<String, Object>> of(ResultSet rs) {
+        Iterator<Map<String, Object>> iterator = new ResultSetIterator(rs);
+        Spliterator<Map<String, Object>> spliterator
+                = Spliterators.spliteratorUnknownSize(iterator, 0);
+        return StreamSupport.stream(spliterator, false);
+    }
     
+    private DatabaseStream() {}
+
 }
