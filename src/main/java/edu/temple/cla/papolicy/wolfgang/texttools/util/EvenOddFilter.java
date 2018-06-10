@@ -34,20 +34,29 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 import java.util.function.Predicate;
 
 /**
- *
- * @author Paul
+ * Predicate to select all, even, or odd items from a stream.
+ * @author Paul Wolfgang
  */
-public class EvenOddFilter implements Predicate<Object>{
-    
+public class EvenOddFilter implements Predicate<Object> {
+
     private int counter;
     private boolean both;
     private int remander;
-    public enum TYPE {BOTH, EVEN, ODD}
+
+    public enum TYPE {
+        BOTH, EVEN, ODD
+    }
+
+    /**
+     * Constructor.
+     * @param type BOTH select all, EVEN selects even, ODD selects odd.
+     */
     public EvenOddFilter(TYPE type) {
         counter = 0;
         switch (type) {
-            case BOTH: both=true;
-            break;
+            case BOTH:
+                both = true;
+                break;
             case EVEN:
                 both = false;
                 remander = 0;
@@ -58,10 +67,17 @@ public class EvenOddFilter implements Predicate<Object>{
                 break;
         }
     }
-    
+
+    /**
+     * Perform the test.
+     * @param o Ignored
+     * @return True if the item is selected.
+     */
     @Override
     public boolean test(Object o) {
-        if (both) return true;
+        if (both) {
+            return true;
+        }
         return (counter++ % 2 == remander);
     }
 }
