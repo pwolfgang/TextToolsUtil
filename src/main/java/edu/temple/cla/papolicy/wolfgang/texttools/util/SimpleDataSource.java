@@ -42,7 +42,7 @@ import java.util.Properties;
 /**
  * A simple data source for getting database connections.
  */
-public class SimpleDataSource {
+public class SimpleDataSource implements AutoCloseable {
 
     /**
      * Initializes the data source.
@@ -86,4 +86,9 @@ public class SimpleDataSource {
     private final String url;
     private String username;
     private String password;
+
+    @Override
+    public void close() throws Exception {
+        // Do nothing
+    }
 }
