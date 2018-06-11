@@ -13,11 +13,11 @@
     <repositories>
         <repository>
             <id>StemmerFactory</id>
-            <url>https://github.com/pwolfgang/StemmerFactory/releases/tag/1.1.0</url>
+            <url>https://github.com/pwolfgang/StemmerFactory/releases/latest</url>
         </repository>
         <repository>
             <id>libsvm_java</id>
-            <url>https://github.com/pwolfgang/libsvm_java/releases/tag/3.17.1</url>
+            <url>https://github.com/pwolfgang/libsvm_java/releases/latest</url>
         </repository>
     </repositories>
     <dependencies>
@@ -47,6 +47,11 @@
             <version>1.2.17</version>
         </dependency>
         <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <dependency>
             <groupId>tw.edu.ntu.csie</groupId>
             <artifactId>libsvm_java</artifactId>
             <version>3.17.1</version>
@@ -54,7 +59,7 @@
         <dependency>
             <groupId>edu.temple.cla.papolicy.wolfgang</groupId>
             <artifactId>StemmerFactory</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
     <build>

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2018, Temple University
  * All rights reserved.
  *
@@ -31,51 +31,41 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
+import picocli.CommandLine;
 
 /**
  *
- * @author Paul Wolfgang
+ * @author Paul
  */
-public class StopWord implements Serializable {
-
-    private Set<String> wordList = new HashSet<>();
+public class CommonFrontEndTest {
     
+    public CommonFrontEndTest() {
+    }
 
-    public StopWord(String language) {
-        String path = null;
-        if (language == null || language.isEmpty()) path = "META-INF/StopWordList.txt";
-        else if ("true".equalsIgnoreCase(language)) path = "META-INF/StopWordList.txt";
-        else if ("false".equalsIgnoreCase(language)) path = null;
-        else if ("0".equalsIgnoreCase(language)) path = null;
-        else path = "META-INF/stoplists/" + language + "/stop.txt";
-        InputStream is = null;
-        if (path != null) is = ClassLoader.getSystemResourceAsStream(path);
-        if (is != null) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    String[] words = line.split("\\|");
-                    words[0] = words[0].trim();
-                    if (!"".equals(words[0]) && !words[0].startsWith("#")) {
-                        wordList.add(words[0]);
-                    }
-                }
-            } catch (IOException ex) {
-                // Ignore for now
-            }
-        }
+    @Test
+    public void testLoadData() {
+        TestDatabase.createTestTable();
+        CommonFrontEnd commonFrontEnd = new CommonFrontEnd();
+        CommandLine commandLine = new CommandLine(commonFrontEnd);
+        commandLine.parse("--datasource", "TestDb.txt",
+                "--table_name", "TestTable",
+                "--id_column", "ID",
+                "--text_column", "Abstract",
+                "--code_column", "Code",
+                "--remove_stopwords",
+                "--do_stemming");
+        List<String> ref = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
+        Vocabulary vocabulary = new Vocabulary();
+        List<WordCounter> counts = new ArrayList();
+        commonFrontEnd.loadData(ids, ref, vocabulary, counts);
+        System.out.println(ids);
+        System.out.println(ref);
+        System.out.println(counts);
+        
     }
     
-    public boolean isStopWord(String word) {
-        return wordList.contains(word.trim());
-    }
 }
