@@ -40,17 +40,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Class to create a test database.
  * @author Paul
  */
 public class TestDatabase {
 
     public static void createTestTable() throws RuntimeException {
-        try (final Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/PAPolicy", "paul", "secret");final Statement stmt = conn.createStatement()) {
+        try (
+                final Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/testdb", "paul", "secret"); 
+                final Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("DROP TABLE IF EXISTS TestTable");
             String query = "CREATE TABLE TestTable (ID varchar(15) primary key, Abstract varchar(32670), Code int)";
             stmt.executeUpdate(query);
-            String enterData = "INSERT INTO TestTable values " + "('20151HB0001', 'The quick brown fox jumps over the lazy dog', 1200)," + "('20151HB0002', 'Now is the time for all good men to come to the aid of the party', 1000)," + "('20151HB0003', 'The slow brown fox cannot jump over the fast dog.', 1200)," + "('20151HB0004', 'It''s party time!', 1000)";
+            String enterData = "INSERT INTO TestTable values " 
+                    + "('20151HB0001', 'The quick brown fox jumps over the lazy dog', 1200)," 
+                    + "('20151HB0002', 'Now is the time for all good men to come to the aid of the party', 1000)," 
+                    + "('20151HB0003', 'The slow brown fox cannot jump over the fast dog.', 1200)," 
+                    + "('20151HB0004', 'It''s party time!', 1000)";
             stmt.executeUpdate(enterData);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -82,5 +88,5 @@ public class TestDatabase {
         list.add(amap);
         return list;
     }
-    
+
 }

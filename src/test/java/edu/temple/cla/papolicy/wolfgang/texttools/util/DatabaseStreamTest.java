@@ -62,7 +62,7 @@ public class DatabaseStreamTest {
 
     @Test
     public void testOf() {
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/PAPolicy", "paul", "secret");
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/testdb", "paul", "secret");
                 Statement stmt = conn.createStatement();) {
             ResultSet rs = stmt.executeQuery("SELECT ID, Abstract, Code from TestTable");
             List<Map<String, Object>> result = new ArrayList<>();
