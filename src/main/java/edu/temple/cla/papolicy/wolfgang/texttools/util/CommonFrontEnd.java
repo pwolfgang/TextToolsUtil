@@ -55,9 +55,6 @@ public class CommonFrontEnd {
     @Option(names = "--code_column", required = true, description = "Column(s) containing the code")
     private String codeColumn;
 
-    @Option(names = "--model", description = "Directory where model files are written")
-    private String modelOutput = "SVM_Model_Dir";
-
     @Option(names = "--feature_dir", description = "Directory where feature files are written")
     private String featureDir = "SVM_Training_Features";
 
@@ -76,8 +73,6 @@ public class CommonFrontEnd {
     @Option(names = "--do_stemming", arity = "0..1", description = "Pass all words through stemming algorithm")
     private String doStemming;
 
-    @Option(names = "--output_vocab", description = "File where vocabulary is written")
-    private String outputVocab;
 
     public void loadData(List<String> ids, List<String> ref, Vocabulary vocabulary, List<WordCounter> counts) {
         Preprocessor preprocessor = new Preprocessor(doStemming, removeStopWords);
@@ -103,11 +98,4 @@ public class CommonFrontEnd {
                 });
     }
     
-    public String getOutputVocab() {
-        return outputVocab;
-    }
-    
-    public String getModelOutput() {
-        return modelOutput;
-    }
 }

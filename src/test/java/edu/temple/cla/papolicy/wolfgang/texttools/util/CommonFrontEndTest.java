@@ -54,9 +54,7 @@ public class CommonFrontEndTest {
                 "--table_name", "TestTable",
                 "--id_column", "ID",
                 "--text_column", "Abstract",
-                "--code_column", "Code",
-                "--remove_stopwords",
-                "--do_stemming");
+                "--code_column", "Code");
         List<String> ref = new ArrayList<>();
         List<String> ids = new ArrayList<>();
         Vocabulary vocabulary = new Vocabulary();
