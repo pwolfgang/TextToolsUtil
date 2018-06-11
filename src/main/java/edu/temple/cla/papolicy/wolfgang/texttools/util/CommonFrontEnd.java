@@ -102,4 +102,12 @@ public class CommonFrontEnd {
                     counts.add(counter);
                 });
     }
+    
+    public String getOutputVocab() {
+        return outputVocab;
+    }
+    
+    public String getModelOutput() {
+        return modelOutput;
+    }
 }
