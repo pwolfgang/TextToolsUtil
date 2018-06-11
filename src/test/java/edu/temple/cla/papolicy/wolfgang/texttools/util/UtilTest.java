@@ -31,7 +31,9 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import edu.temple.cla.papolicy.wolfgang.texttools.util.Util;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -61,6 +63,26 @@ public class UtilTest {
         String expResult = " A Resolution recognizing April 26, 2010, as \"National Healthy Schools Day\" in Pennsylvania. ";
         String result = Util.convertFromXML(source);
         assertEquals(expResult, result);
+    }
+    
+    @Test
+    public void testReadFromDatabaseMajorCode() {
+        System.out.println("testReadFromDatabaseMajorCode");
+        TestDatabase.createTestTable();
+        List<Map<String, Object>> result = new ArrayList<>();
+        Util.readFromDatabase("TestDb.txt", "TestTable", "ID", "Abstract", "Code", true, false, false)
+                .forEach(m -> result.add(m));
+        assertEquals(TestDatabase.buildExpectedResultMajorCode(), result);
+    }
+    
+    @Test
+    public void testReadFromDatabaseCode() {
+        System.out.println("testReadFromDatabaseCode");
+        TestDatabase.createTestTable();
+        List<Map<String, Object>> result = new ArrayList<>();
+        Util.readFromDatabase("TestDb.txt", "TestTable", "ID", "Abstract", "Code", false, false, false)
+                .forEach(m -> result.add(m));
+        assertEquals(TestDatabase.buildExpectedResultMinorCode(), result);
     }
 
 }

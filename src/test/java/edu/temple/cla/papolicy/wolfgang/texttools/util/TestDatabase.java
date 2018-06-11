@@ -89,4 +89,56 @@ public class TestDatabase {
         return list;
     }
 
+    public static List<Map<String, Object>> buildExpectedResultMinorCode() {
+        Map<String, Object> amap;
+        List<Map<String, Object>> list = new ArrayList<>();
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0001");
+        amap.put("theText", "The quick brown fox jumps over the lazy dog");
+        amap.put("theCode", 1200);
+        list.add(amap);
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0002");
+        amap.put("theText", "Now is the time for all good men to come to the aid of the party");
+        amap.put("theCode", 1000);
+        list.add(amap);
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0003");
+        amap.put("theText", "The slow brown fox cannot jump over the fast dog.");
+        amap.put("theCode", 1200);
+        list.add(amap);
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0004");
+        amap.put("theText", "It's party time!");
+        amap.put("theCode", 1000);
+        list.add(amap);
+        return list;
+    }
+
+    public static List<Map<String, Object>> buildExpectedResultMajorCode() {
+        Map<String, Object> amap;
+        List<Map<String, Object>> list = new ArrayList<>();
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0001");
+        amap.put("theText", "The quick brown fox jumps over the lazy dog");
+        amap.put("theCode", 12);
+        list.add(amap);
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0002");
+        amap.put("theText", "Now is the time for all good men to come to the aid of the party");
+        amap.put("theCode", 10);
+        list.add(amap);
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0003");
+        amap.put("theText", "The slow brown fox cannot jump over the fast dog.");
+        amap.put("theCode", 12);
+        list.add(amap);
+        amap = new LinkedHashMap<>();
+        amap.put("theID", "20151HB0004");
+        amap.put("theText", "It's party time!");
+        amap.put("theCode", 10);
+        list.add(amap);
+        return list;
+    }
+
 }

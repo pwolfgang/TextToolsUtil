@@ -136,10 +136,9 @@ public class Util {
                 + codeColumn + ") as theCode FROM ("
                 + tableName + ")";
 
-        try (SimpleDataSource sds = new SimpleDataSource(datasource);
-                Connection conn = sds.getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(query)) {
+        try {
+            SimpleDataSource sds = new SimpleDataSource(datasource);
+            DatabaseStream dbStream = new DatabaseStream(sds);
             System.out.println(query);
             EvenOddFilter evenOddFilter;
             if (!useEven && !useOdd) {
@@ -160,15 +159,14 @@ public class Util {
             } else {
                 doComputeMajor = (m -> m);
             }
-            return DatabaseStream.of(rs)
+            return dbStream.of(query)
                     .filter(evenOddFilter)
                     .map(doComputeMajor);
         } catch (Exception ex) { // Want to catch unchecked exceptions as well
             LOGGER.error("Error reading from database", ex);
             System.err.printf("Error reading from database %s%n", ex.getMessage());
-            System.exit(1);
+            throw new RuntimeException("Error reading from database", ex);
         }
-        throw new Error("Cannot Get Here");
     }
 
     /**

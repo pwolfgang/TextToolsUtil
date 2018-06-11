@@ -31,8 +31,11 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,14 +44,41 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.sql.DataSource;
 
 /**
  * Convert a ResultSet into a Stream. The resulting Stream consists of
- * Map&lt;String, Object&gt; object for each row where the key is the column 
+ * Map&lt;String, Object&gt; object for each row where the key is the column
  * label and the value is the value.
+ *
  * @author Paul Wolfgang
  */
-public class DatabaseStream {
+public class DatabaseStream implements AutoCloseable {
+
+    private DataSource dataSource;
+    private Connection conn;
+    private Statement stmt;
+    private ResultSet rs;
+
+    public DatabaseStream(DataSource dataSource) {
+        this.dataSource = dataSource;
+        try {
+            conn = dataSource.getConnection();
+            stmt = conn.createStatement();
+        } catch (SQLException sqlex) {
+            throw new RuntimeException(sqlex);
+        }
+    }
+    
+    @Override
+    public void close() {
+        try {
+            stmt.close();
+            conn.close();
+        } catch (SQLException sqlex) {
+            throw new RuntimeException(sqlex);
+        }
+    }
 
     /**
      * An iterator over the rows of a ResultSet.
@@ -60,11 +90,11 @@ public class DatabaseStream {
         private boolean thereIsANext;
         private ResultSetMetaData rsMetaData;
 
-        /** 
-         * Constructor.
-         * The constructor initializes the iterator by getting the MetaData from
-         * the ResultSet and initializing the state variables.
-         * @param rs 
+        /**
+         * Constructor. The constructor initializes the iterator by getting the
+         * MetaData from the ResultSet and initializing the state variables.
+         *
+         * @param rs
          */
         public ResultSetIterator(ResultSet rs) {
             try {
@@ -78,12 +108,12 @@ public class DatabaseStream {
         }
 
         /**
-         * Determine if there is a next row.
-         * This method calls the ResultSet next method if the Iterator next
-         * method has not been called. If the ResultSet next method returns 
-         * false, then thereIsANext is set false and false is returned. Otherwise,
-         * thereIsANext is set true and true is returned. In both cases
-         * nextCalled is set true.
+         * Determine if there is a next row. This method calls the ResultSet
+         * next method if the Iterator next method has not been called. If the
+         * ResultSet next method returns false, then thereIsANext is set false
+         * and false is returned. Otherwise, thereIsANext is set true and true
+         * is returned. In both cases nextCalled is set true.
+         *
          * @return true if there is a call to next will succeed.
          */
         @Override
@@ -108,9 +138,10 @@ public class DatabaseStream {
         }
 
         /**
-         * Retrieve the next row from the ResultSet.
-         * A new LinkedHashMap is created and the value of each column
-         * as defined by the ResultSetMetaData is placed into the map.
+         * Retrieve the next row from the ResultSet. A new LinkedHashMap is
+         * created and the value of each column as defined by the
+         * ResultSetMetaData is placed into the map.
+         *
          * @return a Map representation of the row&apos;s content.
          */
         @Override
@@ -122,7 +153,7 @@ public class DatabaseStream {
                 Map<String, Object> result = new LinkedHashMap<>();
                 int numColumns = rsMetaData.getColumnCount();
                 for (int i = 1; i <= numColumns; i++) {
-                    String columnName = rsMetaData.getColumnName(i);
+                    String columnName = rsMetaData.getColumnLabel(i);
                     Object columnValue = rs.getObject(i);
                     result.put(columnName, columnValue);
                 }
@@ -137,16 +168,31 @@ public class DatabaseStream {
 
     /**
      * Create a stream from a ResultSet
-     * @param rs The input ResultSet
+     *
+     * @param query The query to create the result set.
      * @return A Stream that returns each row of the ResultSet as a Map.
      */
-    public static Stream<Map<String, Object>> of(ResultSet rs) {
-        Iterator<Map<String, Object>> iterator = new ResultSetIterator(rs);
-        Spliterator<Map<String, Object>> spliterator
-                = Spliterators.spliteratorUnknownSize(iterator, 0);
-        return StreamSupport.stream(spliterator, false);
+    public Stream<Map<String, Object>> of(String query) {
+        try {
+            rs = stmt.executeQuery(query);
+            Iterator<Map<String, Object>> iterator = new ResultSetIterator(rs);
+            Spliterator<Map<String, Object>> spliterator
+                    = Spliterators.spliteratorUnknownSize(iterator, 0);
+            Stream<Map<String, Object>> stream = StreamSupport.stream(spliterator, false);
+            stream.onClose(() -> {
+                try {
+                    rs.close();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            return stream;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
-    
-    private DatabaseStream() {}
+
+    private DatabaseStream() {
+    }
 
 }

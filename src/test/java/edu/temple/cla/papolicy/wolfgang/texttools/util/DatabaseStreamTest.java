@@ -31,16 +31,11 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.sql.DataSource;
 import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,11 +57,12 @@ public class DatabaseStreamTest {
 
     @Test
     public void testOf() {
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/testdb", "paul", "secret");
-                Statement stmt = conn.createStatement();) {
-            ResultSet rs = stmt.executeQuery("SELECT ID, Abstract, Code from TestTable");
+        try {
+            DataSource ds = new SimpleDataSource("TestDb.txt");
+            DatabaseStream dbStream = new DatabaseStream(ds);
+            String query = "SELECT ID, Abstract, Code from TestTable";
             List<Map<String, Object>> result = new ArrayList<>();
-            DatabaseStream.of(rs)
+            dbStream.of(query)
                     .forEach(result::add);
             List<Map<String, Object>> expected = TestDatabase.buildExpectedResult();
             assertTrue(compareLists(expected, result));
