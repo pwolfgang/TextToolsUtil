@@ -182,6 +182,8 @@ public class DatabaseStream implements AutoCloseable {
             stream.onClose(() -> {
                 try {
                     rs.close();
+                    stmt.close();
+                    conn.close();
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
