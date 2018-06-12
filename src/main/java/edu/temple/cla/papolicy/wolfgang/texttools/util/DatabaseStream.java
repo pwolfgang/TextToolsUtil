@@ -53,7 +53,7 @@ import javax.sql.DataSource;
  *
  * @author Paul Wolfgang
  */
-public class DatabaseStream implements AutoCloseable {
+public class DatabaseStream {
 
     private DataSource dataSource;
     private Connection conn;
@@ -70,16 +70,6 @@ public class DatabaseStream implements AutoCloseable {
         }
     }
     
-    @Override
-    public void close() {
-        try {
-            stmt.close();
-            conn.close();
-        } catch (SQLException sqlex) {
-            throw new RuntimeException(sqlex);
-        }
-    }
-
     /**
      * An iterator over the rows of a ResultSet.
      */

@@ -32,6 +32,7 @@
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import java.util.List;
+import java.util.Objects;
 import picocli.CommandLine.Option;
 
 /**
@@ -86,7 +87,7 @@ public class CommonFrontEnd {
                 useOdd)
                 .forEach(m -> {
                     ids.add((String) m.get("theID"));
-                    ref.add(m.get("theCode").toString());
+                    ref.add(Objects.toString(m.get("theCode")));
                     String line = (String) m.get("theText");
                     WordCounter counter = new WordCounter();
                     preprocessor.preprocess(line)
@@ -97,5 +98,84 @@ public class CommonFrontEnd {
                     counts.add(counter);
                 });
     }
+
+    /**
+     * @return the dataSourceFileName
+     */
+    public String getDataSourceFileName() {
+        return dataSourceFileName;
+    }
+
+    /**
+     * @return the tableName
+     */
+    public String getTableName() {
+        return tableName;
+    }
+
+    /**
+     * @return the idColumn
+     */
+    public String getIdColumn() {
+        return idColumn;
+    }
+
+    /**
+     * @return the textColumn
+     */
+    public String getTextColumn() {
+        return textColumn;
+    }
+
+    /**
+     * @return the codeColumn
+     */
+    public String getCodeColumn() {
+        return codeColumn;
+    }
+
+    /**
+     * @return the featureDir
+     */
+    public String getFeatureDir() {
+        return featureDir;
+    }
+
+    /**
+     * @return the useEven
+     */
+    public Boolean getUseEven() {
+        return useEven;
+    }
+
+    /**
+     * @return the useOdd
+     */
+    public Boolean getUseOdd() {
+        return useOdd;
+    }
+
+    /**
+     * @return the computeMajor
+     */
+    public Boolean getComputeMajor() {
+        return computeMajor;
+    }
+
+    /**
+     * @return the removeStopWords
+     */
+    public String getRemoveStopWords() {
+        return removeStopWords;
+    }
+
+    /**
+     * @return the doStemming
+     */
+    public String getDoStemming() {
+        return doStemming;
+    }
+    
+    
     
 }

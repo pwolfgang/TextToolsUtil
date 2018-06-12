@@ -153,7 +153,9 @@ public class Util {
             Function<Map<String, Object>, Map<String, Object>> doComputeMajor;
             if (computeMajor) {
                 doComputeMajor = (m -> {
-                    m.put("theCode", ((Integer) m.get("theCode")) / 100);
+                    Integer code = (Integer) m.get("theCode");
+                    if (code == null) code = 0;
+                    m.put("theCode", code / 100);
                     return m;
                 });
             } else {
