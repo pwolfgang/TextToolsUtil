@@ -57,6 +57,10 @@ public class WordCounter implements Serializable {
         public void increment() {
             ++count;
         }
+        
+        public void add(int delta) {
+            count += delta;
+        }
 
         /**
          * Return the count
@@ -93,6 +97,23 @@ public class WordCounter implements Serializable {
             count.increment();
             ++numWords;
     }
+    
+    /**
+     * Update the counts for each word in another counter.
+     * @param wordCounter 
+     */
+    public void updateCounts(WordCounter wordCounter) {
+        wordCounter.wordMap.forEach((w, c) -> {
+            Counter count = wordMap.get(w);
+            if (count == null) {
+                count = new Counter();
+                wordMap.put(w, count);
+            }
+            count.add(c.getCount());
+            numWords += c.getCount();
+        });
+        
+    }
 
     /**
      * Return the number of words seen
@@ -101,6 +122,15 @@ public class WordCounter implements Serializable {
      */
     public int getNumWords() {
         return numWords;
+    }
+    
+    public int getCount(String word) {
+        Counter c = wordMap.get(word);
+        if (c == null) {
+            return 0;
+        } else {
+            return c.getCount();
+        }
     }
 
     /**

@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,9 +66,6 @@ public class Vocabulary implements Serializable {
     /** Flag to indicate that new words are not to be entered into the vocabulary */
     private boolean frozen = false;
     
-    /** Count of the total number of words entered */
-    int wordCount;
-
     /** Construct an empty Vocabulary */
     public Vocabulary() {
         allWords = new ArrayList<>();
@@ -124,6 +122,10 @@ public class Vocabulary implements Serializable {
         if (wordID == null) return null;
         return allWords.get(wordID);
     }
+    
+    public Integer getWordCount(String word) {
+        return counter.getCount(word);
+    }
 
     /** Method to return the word given the wordID
      *  @param wordID The id of the word
@@ -135,6 +137,14 @@ public class Vocabulary implements Serializable {
     
     public int numFeatures() {
         return idWords.size();
+    }
+    
+    public int getNumWords() {
+        return counter.getNumWords();
+    }
+    
+    public List<String> getWordList() {
+        return Collections.unmodifiableList(idWords);
     }
 
     /**
