@@ -31,8 +31,12 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 import picocli.CommandLine.Option;
 
 /**
@@ -40,6 +44,7 @@ import picocli.CommandLine.Option;
  * @author Paul
  */
 public class CommonFrontEnd {
+
     
     @Option(names = "--datasource", required = true, description = "File containing the datasource properties")
     private String dataSourceFileName;
@@ -97,6 +102,40 @@ public class CommonFrontEnd {
                             });
                     counts.add(counter);
                 });
+    }
+
+    /**
+     * Method to write the classification results to the database
+     *
+     * @param tableName The name of the table
+     * @param outputCodeCol The column where the results are set
+     * @param ids The list of ids
+     * @param cats The corresponding list if categories.
+     */
+    public void outputToDatabase(String tableName, String outputCodeCol, List<String> ids, List<Integer> cats) {
+        try {
+            SimpleDataSource sds = new SimpleDataSource(dataSourceFileName);
+            try (final Connection conn = sds.getConnection();
+                    final Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate("DROP TABLE IF EXISTS NewCodes");
+                stmt.executeUpdate("CREATE TABLE NewCodes (ID char(11) primary key, Code int)");
+                StringBuilder stb = new StringBuilder("INSERT INTO NewCodes (ID, Code) VALUES");
+                StringJoiner sj = new StringJoiner(",\n");
+                for (int i = 0; i < ids.size(); i++) {
+                    sj.add(String.format("('%s', %d)", ids.get(i), cats.get(i)));
+                }
+                stb.append(sj);
+                stmt.executeUpdate(stb.toString());
+                stmt.executeUpdate("UPDATE " + tableName + " join NewCodes on " 
+                        + tableName + ".ID=NewCodes.ID SET " + tableName + "." 
+                        + outputCodeCol + "=NewCodes.Code");
+            } catch (SQLException ex) {
+                throw ex;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
     }
 
     /**
