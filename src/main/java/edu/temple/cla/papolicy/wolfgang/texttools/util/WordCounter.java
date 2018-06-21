@@ -80,8 +80,11 @@ public class WordCounter implements Serializable {
             return Integer.toString(count);
         }
     }
+    
+    private Map<String, Double> laplaseProb = null;
     private final Map<String, Counter> wordMap = new HashMap<>();
     private int numWords = 0;
+    private int sum = 0;
 
     /**
      * Update the count for a word
@@ -147,6 +150,24 @@ public class WordCounter implements Serializable {
         } else {
             return 0.0;
         }
+    }
+    
+    
+    public double getLaplaseProb(String word, Vocabulary vocab) {
+        if (laplaseProb == null) {
+            laplaseProb = new HashMap<>();
+            sum = 0;
+            wordMap.forEach((w, c) -> {
+                int cP1 = c.getCount() + 1;
+                laplaseProb.put(w, (double)cP1);
+                sum += cP1;
+            });
+            laplaseProb.keySet().forEach((w) -> {
+                double countForWord = laplaseProb.get(w);
+                laplaseProb.put(w, countForWord/sum);
+            });
+        }
+        return laplaseProb.getOrDefault(word, vocab.getWordProb(vocab.getWordId(word)));
     }
 
     /**

@@ -74,6 +74,7 @@ public class Vocabulary implements Serializable {
         wordIds = new HashMap<>();
         idWords = new ArrayList<>();
         idWords.add(""); // there is no word zero
+        wordIds.put("", 0);
         counter = new WordCounter();
     }
 
