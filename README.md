@@ -1,6 +1,11 @@
 # Utility classes used by the TextTools
 
 <dl>
+<dt>CommonFrontEnd</dt>
+<dd>Common code process a subset of the command-line parameters and 
+to read data from a database and filter it into features</dd>
+<dt>DatabaseStream</dt>
+<dd>A class to return the results of a SQL query as a Stream</dd>
 <dt>DisjointSet</dt>
 <dd>An implementation of the disjoint set</dd>
 <dt>DoubleIntInt</dt>

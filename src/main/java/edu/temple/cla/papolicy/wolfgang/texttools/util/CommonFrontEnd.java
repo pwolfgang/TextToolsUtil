@@ -40,8 +40,9 @@ import java.util.StringJoiner;
 import picocli.CommandLine.Option;
 
 /**
- *
- * @author Paul
+ * Class to process selected command-line arguments and read the data from
+ * a database.
+ * @author Paul Wolfgang
  */
 public class CommonFrontEnd {
 
@@ -80,6 +81,13 @@ public class CommonFrontEnd {
     private String doStemming;
 
 
+    /**
+     * Load the data from the database.
+     * @param ids Output list of the ID column
+     * @param ref Output list of the Code column
+     * @param vocabulary Output Vocabulary of the features
+     * @param counts Output feature sets of the Text.
+     */
     public void loadData(List<String> ids, List<String> ref, Vocabulary vocabulary, List<WordCounter> counts) {
         Preprocessor preprocessor = new Preprocessor(doStemming, removeStopWords);
         Util.readFromDatabase(dataSourceFileName,
@@ -110,7 +118,7 @@ public class CommonFrontEnd {
      * @param tableName The name of the table
      * @param outputCodeCol The column where the results are set
      * @param ids The list of ids
-     * @param cats The corresponding list if categories.
+     * @param cats The corresponding list of categories.
      */
     public void outputToDatabase(String tableName, String outputCodeCol, List<String> ids, List<Integer> cats) {
         try {

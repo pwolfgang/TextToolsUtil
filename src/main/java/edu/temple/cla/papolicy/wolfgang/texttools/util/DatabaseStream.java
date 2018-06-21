@@ -47,9 +47,9 @@ import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 
 /**
- * Convert a ResultSet into a Stream. The resulting Stream consists of
- * Map&lt;String, Object&gt; object for each row where the key is the column
- * label and the value is the value.
+ * Convert the result of a SQL query into a Stream. The resulting Stream 
+ * consists of Map&lt;String, Object&gt; object for each row where the key 
+ * is the column label and the value is the value.
  *
  * @author Paul Wolfgang
  */
