@@ -124,6 +124,10 @@ public class Vocabulary implements Serializable {
         return allWords.get(wordID);
     }
     
+    public double getLaplaseProb(String word) {
+        return counter.getLaplaseProb(word).orElse(Double.MIN_NORMAL);
+    }
+    
     public Integer getWordCount(String word) {
         return counter.getCount(word);
     }

@@ -34,6 +34,7 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -153,7 +154,7 @@ public class WordCounter implements Serializable {
     }
     
     
-    public double getLaplaseProb(String word, Vocabulary vocab) {
+    public Optional<Double> getLaplaseProb(String word) {
         if (laplaseProb == null) {
             laplaseProb = new HashMap<>();
             sum = 0;
@@ -167,7 +168,7 @@ public class WordCounter implements Serializable {
                 laplaseProb.put(w, countForWord/sum);
             });
         }
-        return laplaseProb.getOrDefault(word, vocab.getWordProb(vocab.getWordId(word)));
+        return Optional.ofNullable(laplaseProb.get(word));
     }
 
     /**
