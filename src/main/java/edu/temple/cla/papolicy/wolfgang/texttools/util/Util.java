@@ -33,8 +33,12 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -500,6 +504,24 @@ public class Util {
             svm_node_list.add(node);
         });
         return svm_node_list.toArray(new svm_node[svm_node_list.size()]);
+    }
+
+    public static void outputFile(File modelParent, String name, Object object) {
+        File outFile = new File(modelParent, name);
+        try (final ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outFile))) {
+            oos.writeObject(object);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error writing " + outFile.getPath(), ex);
+        }
+    }
+
+    public static Object readFile(File modelParent, String name) {
+        File inputFile = new File(modelParent, name);
+        try (final ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputFile))) {
+            return ois.readObject();
+        } catch (ClassNotFoundException | IOException ioex) {
+            throw new RuntimeException("Error reading " + inputFile.getPath(), ioex);
+        }
     }
 
 }
