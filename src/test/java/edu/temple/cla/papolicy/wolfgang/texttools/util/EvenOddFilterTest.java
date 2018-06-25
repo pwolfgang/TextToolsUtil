@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2018, Temple University
  * All rights reserved.
  *
@@ -29,68 +29,51 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package edu.temple.cis.wolfgang.util;
+package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import edu.temple.cla.papolicy.wolfgang.texttools.util.StopWord;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
- * @author Paul Wolfgang
+ * @author Paul
  */
-public class StopWordTest {
+public class EvenOddFilterTest {
 
-    private final StopWord stopWord;
-
-    public StopWordTest() {
-        stopWord = new StopWord("English");
+    public EvenOddFilterTest() {
     }
 
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of isStopWord method, of class StopWord.
-     * yourself is a stop word
-     */
     @Test
-    public void testIsStopWord1() {
-        System.out.println("isStopWord1");
-        String word = "yourself";
-        boolean expResult = true;
-        boolean result = stopWord.isStopWord(word);
-        assertEquals(expResult, result);
+    public void testBoth() {
+        System.out.println("BOTH");
+        List<Integer> result = IntStream.range(0, 10)
+                .mapToObj(Integer::new)
+                .filter(new EvenOddFilter(EvenOddFilter.TYPE.BOTH))
+                .collect(Collectors.toList());
+        assertEquals(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), result);
     }
 
-    /**
-     * Test of isStopWord method, of class StopWord.
-     * arf is not a stop word
-     */
     @Test
-    public void testIsStopWord2() {
-        System.out.println("isStopWord2");
-        String word = "arf";
-        boolean expResult = false;
-        boolean result = stopWord.isStopWord(word);
-        assertEquals(expResult, result);
+    public void testEven() {
+        System.out.println("EVEN");
+        List<Integer> result = IntStream.range(0, 10)
+                .mapToObj(Integer::new)
+                .filter(new EvenOddFilter(EvenOddFilter.TYPE.EVEN))
+                .collect(Collectors.toList());
+        assertEquals(Arrays.asList(0,2, 4, 6, 8), result);        
+    }
+
+    @Test
+    public void testOdd() {
+        System.out.println("ODD");
+        List<Integer> result = IntStream.range(0, 10)
+                .mapToObj(Integer::new)
+                .filter(new EvenOddFilter(EvenOddFilter.TYPE.ODD))
+                .collect(Collectors.toList());
+        assertEquals(Arrays.asList(1 ,3, 5, 7, 9), result);        
     }
 }

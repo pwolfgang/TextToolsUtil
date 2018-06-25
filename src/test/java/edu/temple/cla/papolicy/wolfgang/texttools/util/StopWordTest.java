@@ -31,51 +31,66 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import edu.temple.cla.papolicy.wolfgang.texttools.util.StopWord;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Paul Wolfgang
  */
-public class StopWord implements Serializable {
+public class StopWordTest {
 
-    private Set<String> wordList = new HashSet<>();
-    
+    private final StopWord stopWord;
 
-    public StopWord(String language) {
-        String path = null;
-        if (language == null || language.isEmpty()) path = "META-INF/StopWordList.txt";
-        else if ("true".equalsIgnoreCase(language)) path = "META-INF/StopWordList.txt";
-        else if ("false".equalsIgnoreCase(language)) path = null;
-        else if ("0".equalsIgnoreCase(language)) path = null;
-        else path = "META-INF/stoplists/" + language + "/stop.txt";
-        InputStream is = null;
-        if (path != null) is = ClassLoader.getSystemResourceAsStream(path);
-        if (is != null) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    String[] words = line.split("\\|");
-                    words[0] = words[0].trim();
-                    if (!"".equals(words[0]) && !words[0].startsWith("#")) {
-                        wordList.add(words[0]);
-                    }
-                }
-            } catch (IOException ex) {
-                // Ignore for now
-            }
-        }
+    public StopWordTest() {
+        stopWord = new StopWord("English");
     }
-    
-    public boolean isStopWord(String word) {
-        return wordList.contains(word.trim());
+
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() {
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    /**
+     * Test of isStopWord method, of class StopWord.
+     * yourself is a stop word
+     */
+    @Test
+    public void testIsStopWord1() {
+        System.out.println("isStopWord1");
+        String word = "yourself";
+        boolean expResult = true;
+        boolean result = stopWord.isStopWord(word);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of isStopWord method, of class StopWord.
+     * arf is not a stop word
+     */
+    @Test
+    public void testIsStopWord2() {
+        System.out.println("isStopWord2");
+        String word = "arf";
+        boolean expResult = false;
+        boolean result = stopWord.isStopWord(word);
+        assertEquals(expResult, result);
     }
 }

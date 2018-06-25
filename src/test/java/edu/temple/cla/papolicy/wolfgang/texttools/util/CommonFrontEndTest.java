@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2018, Temple University
  * All rights reserved.
  *
@@ -29,38 +29,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package edu.temple.cis.wolfgang.util;
+package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import edu.temple.cla.papolicy.wolfgang.texttools.util.Util;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import picocli.CommandLine;
 
 /**
  *
- * @author Paul Wolfgang
+ * @author Paul
  */
-public class UtilTest {
+public class CommonFrontEndTest {
     
-    public UtilTest() {
-    }
-
-
-    @Test
-    public void testConvertToXML() {
-        System.out.println("convertToXML");
-        String source = "The \"quick\" fox's are < “fast” dogs";
-        String expResult = "The &quot;quick&quot; fox&apos;s are &lt; &#8220;fast&#8221; dogs";
-        String result = Util.convertToXML(source);
-        assertEquals(expResult, result);
+    public CommonFrontEndTest() {
     }
 
     @Test
-    public void testConvertFromXML() {
-        System.out.println("convertFromXML");
-        String source = " A Resolution recognizing April 26, 2010, as &quot;National Healthy Schools Day&quot; in Pennsylvania. ";
-        String expResult = " A Resolution recognizing April 26, 2010, as \"National Healthy Schools Day\" in Pennsylvania. ";
-        String result = Util.convertFromXML(source);
-        assertEquals(expResult, result);
+    public void testLoadData() {
+        TestDatabase.createTestTable();
+        CommonFrontEnd commonFrontEnd = new CommonFrontEnd();
+        CommandLine commandLine = new CommandLine(commonFrontEnd);
+        commandLine.parse("--datasource", "TestDb.txt",
+                "--table_name", "TestTable",
+                "--id_column", "ID",
+                "--text_column", "Abstract",
+                "--code_column", "Code");
+        List<String> ref = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
+        Vocabulary vocabulary = new Vocabulary();
+        List<WordCounter> counts = new ArrayList();
+        commonFrontEnd.loadData(ids, ref, vocabulary, counts);
+        System.out.println(ids);
+        System.out.println(ref);
+        System.out.println(counts);
+        
     }
-
+    
 }

@@ -30,10 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
+
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,9 +52,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import tw.edu.ntu.csie.libsvm.svm_node;
-
 
 /**
  * Class to contain static utility methods
@@ -57,14 +63,14 @@ import tw.edu.ntu.csie.libsvm.svm_node;
  * @author Paul Wolfgang
  */
 public class Util {
-    
+
     private static final Logger LOGGER = Logger.getLogger(Util.class);
     private static final double LOGE2 = Math.log(2.0);
     private static final Map<Character, String> XML_CHAR_MAP = new HashMap<>();
     private static final Map<String, Character> XML_CODE_MAP = new HashMap<>();
-    
+
     static {
-        String[][] xmlTransTable = new String[][] {
+        String[][] xmlTransTable = new String[][]{
             {"<", "&lt;"},
             {">", "&gt;"},
             {"&", "&amp;"},
@@ -76,20 +82,22 @@ public class Util {
         }
     }
 
-    /** Method to reads samples from a file. Each input line consists of the
+    /**
+     * Method to reads samples from a file. Each input line consists of the
      * Category followed by the text. These are separated by a '|' character.
+     *
      * @param inputFileName The name of the input file
      * @param lines The ArrayList to contain the text lines
      * @param ref The ArrayList to contain the categories
      */
-    public static void readFromFile (
+    public static void readFromFile(
             String inputFileName,
             List<String> lines,
             List<String> ref) {
         lines.clear();
         ref.clear();
-        try (BufferedReader in = 
-                new BufferedReader(new FileReader(inputFileName))) {
+        try (BufferedReader in
+                = new BufferedReader(new FileReader(inputFileName))) {
             in.lines().forEach(line -> {
                 String[] tokens = line.split("\\s*\\|\\s*");
                 if (tokens.length >= 2) {
@@ -103,8 +111,10 @@ public class Util {
             System.exit(1);
         }
     }
-    
-    /** Method to read samples from a database 
+
+    /**
+     * Method to read samples from a database
+     *
      * @param datasource The datasource referencing the database
      * @param tableName The name of the table
      * @param idColumn The column containing the unique ID
@@ -113,11 +123,9 @@ public class Util {
      * @param computeMajor If true, the major code is computed
      * @param useEven If true, even samples are returned
      * @param useOdd If true, odd samples are returned
-     * @param id ArrayList containing the ID's
-     * @param lines ArrayList containing the text lines
-     * @param ref ArrayList containing the code
+     * @return A Stream of selected rows as a Map from column name to value.
      */
-    public static void readFromDatabase (
+    public static Stream<Map<String, Object>> readFromDatabase(
             String datasource,
             String tableName,
             String idColumn,
@@ -125,72 +133,67 @@ public class Util {
             String codeColumn,
             boolean computeMajor,
             boolean useEven,
-            boolean useOdd,
-            List<String> id,
-            List<String> lines,
-            List<String> ref) {
-        id.clear();
-        lines.clear();
-        ref.clear();
-        String query = "SELECT (" +
-            idColumn + ") as theID, (" +
-            textColumn + ") as theText, (" +
-            codeColumn + ") as theCode FROM (" +
-            tableName + ")";
+            boolean useOdd) {
+        String query = "SELECT ("
+                + idColumn + ") as theID, ("
+                + textColumn + ") as theText, ("
+                + codeColumn + ") as theCode FROM ("
+                + tableName + ")";
+
         try {
             SimpleDataSource sds = new SimpleDataSource(datasource);
-            try (Connection conn = sds.getConnection(); 
-                    Statement stmt = conn.createStatement(); 
-                    ResultSet rs = stmt.executeQuery(query)) {
-                System.out.println(query);
-                int counter = -1;
-                while (rs.next()) {
-                    ++counter;
-                    if ((!useEven && ! useOdd) ||
-                            (useEven && counter % 2 == 0) ||
-                            (useOdd && counter %2 == 1)) {
-                        String theID = rs.getString("theID");
-                        String theText = rs.getString("theText");
-                        theText = convertFromXML(theText);
-                        int code = rs.getInt("theCode");
-                        if (theID != null) {
-                            id.add(theID);
-                            if (theText == null) {
-                                lines.add("");
-                            } else {
-                                lines.add(theText);
-                            }
-                            if (computeMajor) code = code / 100;
-                            ref.add(Integer.toString(code));
-                        }
-                    }
-                }
+            DatabaseStream dbStream = new DatabaseStream(sds);
+            System.out.println(query);
+            EvenOddFilter evenOddFilter;
+            if (!useEven && !useOdd) {
+                evenOddFilter = new EvenOddFilter(EvenOddFilter.TYPE.BOTH);
+            } else if (useEven && !useOdd) {
+                evenOddFilter = new EvenOddFilter(EvenOddFilter.TYPE.EVEN);
+            } else if (!useEven && useOdd) {
+                evenOddFilter = new EvenOddFilter(EvenOddFilter.TYPE.ODD);
+            } else {
+                throw new RuntimeException("Cannot Select both UseEven and UseOdd");
             }
+            Function<Map<String, Object>, Map<String, Object>> doComputeMajor;
+            if (computeMajor) {
+                doComputeMajor = (m -> {
+                    Integer code = (Integer) m.get("theCode");
+                    if (code == null) code = 0;
+                    m.put("theCode", code / 100);
+                    return m;
+                });
+            } else {
+                doComputeMajor = (m -> m);
+            }
+            return dbStream.of(query)
+                    .filter(evenOddFilter)
+                    .map(doComputeMajor);
         } catch (Exception ex) { // Want to catch unchecked exceptions as well
             LOGGER.error("Error reading from database", ex);
             System.err.printf("Error reading from database %s%n", ex.getMessage());
-            System.exit(1);
+            throw new RuntimeException("Error reading from database", ex);
         }
     }
 
-     /**
-      * Method to read samples from a database. Special version for use by
-      * FindNearDuplicateClusters.
-      * @param datasource The datasource referencing the database
-      * @param tableName The name of the table
-      * @param idColumn The column containing the unique ID
-      * @param textColumn The column(s) containing the text
-      * @param codeColumn The column containing the code
-      * @param clusterColumn The column containing the cluster history
-      * @param computeMajor If true, the major code is computed
-      * @param useEven If true, even samples are returned
-      * @param useOdd If true, odd samples are returned
-      * @param id List containing the ID's
-      * @param lines List containing the text lines
-      * @param ref List containing the code
-      * @param cluster List containing the cluster history
+    /**
+     * Method to read samples from a database. Special version for use by
+     * FindNearDuplicateClusters.
+     *
+     * @param datasource The datasource referencing the database
+     * @param tableName The name of the table
+     * @param idColumn The column containing the unique ID
+     * @param textColumn The column(s) containing the text
+     * @param codeColumn The column containing the code
+     * @param clusterColumn The column containing the cluster history
+     * @param computeMajor If true, the major code is computed
+     * @param useEven If true, even samples are returned
+     * @param useOdd If true, odd samples are returned
+     * @param id List containing the ID's
+     * @param lines List containing the text lines
+     * @param ref List containing the code
+     * @param cluster List containing the cluster history
      */
-    public static void readFromDatabase (
+    public static void readFromDatabase(
             String datasource,
             String tableName,
             String idColumn,
@@ -207,24 +210,24 @@ public class Util {
         id.clear();
         lines.clear();
         ref.clear();
-        String query = "SELECT (" +
-            idColumn + ") as theID, (" +
-            textColumn + ") as theText, (" +
-            codeColumn + ") as theCode, (" +
-            clusterColumn + ") as theCluster FROM (" +
-            tableName + ")";
+        String query = "SELECT ("
+                + idColumn + ") as theID, ("
+                + textColumn + ") as theText, ("
+                + codeColumn + ") as theCode, ("
+                + clusterColumn + ") as theCluster FROM ("
+                + tableName + ")";
         try {
             SimpleDataSource sds = new SimpleDataSource(datasource);
-            try (Connection conn = sds.getConnection(); 
-                    Statement stmt = conn.createStatement(); 
+            try (Connection conn = sds.getConnection();
+                    Statement stmt = conn.createStatement();
                     ResultSet rs = stmt.executeQuery(query)) {
                 System.out.println(query);
                 int counter = -1;
                 while (rs.next()) {
                     ++counter;
-                    if ((!useEven && ! useOdd) ||
-                            (useEven && counter % 2 == 0) ||
-                            (useOdd && counter %2 == 1)) {
+                    if ((!useEven && !useOdd)
+                            || (useEven && counter % 2 == 0)
+                            || (useOdd && counter % 2 == 1)) {
                         String theID = rs.getString("theID");
                         String theText = rs.getString("theText");
                         theText = convertFromXML(theText);
@@ -237,7 +240,9 @@ public class Util {
                             } else {
                                 lines.add(theText);
                             }
-                            if (computeMajor) code = code / 100;
+                            if (computeMajor) {
+                                code = code / 100;
+                            }
                             ref.add(Integer.toString(code));
                             if (theCluster == null) {
                                 cluster.add(null);
@@ -259,17 +264,17 @@ public class Util {
             System.exit(1);
         }
     }
-    
+
     public static void updateClusterInDatabase(
             String datasource,
             String tableName,
             String idColumn,
             String clusterColumn,
-            List<String> ids, 
+            List<String> ids,
             List<Integer> cluster) throws Exception {
         SimpleDataSource sds = new SimpleDataSource(datasource);
-            String query = "update " + tableName + " set " + clusterColumn + "=? where " + idColumn + "=?";
-        try (Connection conn = sds.getConnection(); 
+        String query = "update " + tableName + " set " + clusterColumn + "=? where " + idColumn + "=?";
+        try (Connection conn = sds.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
             for (int i = 0; i < ids.size(); i++) {
                 Integer newClusterValue = cluster.get(i);
@@ -281,12 +286,13 @@ public class Util {
             }
         }
     }
-    
-   
-    /** Method to compute attribute values.  The attribute values is the
-     * log2(p(w|t)/p(w)) where p(w|t) is the probability of the word in
-     * the text sample, and p(w) is the probability of the word over all
-     * of the training samples.
+
+    /**
+     * Method to compute attribute values. The attribute values is the
+     * log2(p(w|t)/p(w)) where p(w|t) is the probability of the word in the text
+     * sample, and p(w) is the probability of the word over all of the training
+     * samples.
+     *
      * @param counter WordCounter for the sample
      * @param vocab Vocabulary of the training data
      * @param logCutoff The minimum value of an attribute
@@ -303,7 +309,7 @@ public class Util {
             if (wordID != null) {
                 double pWgivenT = counter.getProb(word);
                 double pW = vocab.getWordProb(wordID);
-                double attribute = Math.log(pWgivenT/pW)/LOGE2;
+                double attribute = Math.log(pWgivenT / pW) / LOGE2;
                 if (attribute > logCutoff) {
                     result.put(wordID, attribute);
                 }
@@ -311,10 +317,12 @@ public class Util {
         });
         return result;
     }
-    
-    /** Method to write a feature line. A feature line begins with the value
-     * (+1, -1, or 0) followed by feature pairs.  Each feature pair is a
-     * feature number followed by a colon and then a feature value
+
+    /**
+     * Method to write a feature line. A feature line begins with the value (+1,
+     * -1, or 0) followed by feature pairs. Each feature pair is a feature
+     * number followed by a colon and then a feature value
+     *
      * @param out The print writer to write the line to
      * @param value The value of this featureMap
      * @param featureMap The SortedMap containing the features
@@ -328,9 +336,10 @@ public class Util {
         featureMap.forEach((k, v) -> out.print(" " + k + ":" + v));
         out.println();
     }
-    
-    
-    /** Method to recursively delete a directory
+
+    /**
+     * Method to recursively delete a directory
+     *
      * @param dir The directory to be deleted
      */
     public static void delDir(File dir) {
@@ -349,8 +358,10 @@ public class Util {
             dir.delete();
         }
     }
-    
-    /** Method to remove multiple spaces and replace with a single space
+
+    /**
+     * Method to remove multiple spaces and replace with a single space
+     *
      * @param line The line containing the text
      * @return The line with extra spaces removed
      */
@@ -373,13 +384,17 @@ public class Util {
         }
         return result.toString();
     }
-    
-    /** Method to convert string content to XML format.
-     *  @param source The source string
-     *  @return The converted string
+
+    /**
+     * Method to convert string content to XML format.
+     *
+     * @param source The source string
+     * @return The converted string
      */
     public static String convertToXML(String source) {
-        if (source == null) return "";
+        if (source == null) {
+            return "";
+        }
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < source.length(); i++) {
             char c = source.charAt(i);
@@ -396,27 +411,31 @@ public class Util {
         return result.toString();
     }
 
-    /** Method to convert string content from XML format.
-     *  @param source The source string
-     *  @return The converted string
+    /**
+     * Method to convert string content from XML format.
+     *
+     * @param source The source string
+     * @return The converted string
      */
     public static String convertFromXML(String source) {
-        if (source == null) return "";
+        if (source == null) {
+            return "";
+        }
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < source.length(); i++) {
             char c = source.charAt(i);
             if (c == '&') {
                 int nextSemi = source.indexOf(";", i);
                 if (nextSemi != -1) {
-                    String code = source.substring(i, nextSemi+1);
+                    String code = source.substring(i, nextSemi + 1);
                     Character cprime = XML_CODE_MAP.get(code);
                     if (cprime != null) {
                         result.append(cprime);
                         i = nextSemi;
                     } else {
-                        code = code.substring(2, code.length()-1);
+                        code = code.substring(2, code.length() - 1);
                         try {
-                            cprime = (char)Integer.parseInt(code);
+                            cprime = (char) Integer.parseInt(code);
                             result.append(cprime);
                             i = nextSemi;
                         } catch (NumberFormatException ex) {
@@ -433,43 +452,50 @@ public class Util {
         return result.toString();
     }
 
-    /** Method to compute the innerproduct of two attribute sets. The attribute
+    /**
+     * Method to compute the innerproduct of two attribute sets. The attribute
      * sets are represented as sortedMaps from feature index to feature value.
-     * The innerproduct is the sum of the product of the feature values where the
-     * feature indices are equal.
+     * The innerproduct is the sum of the product of the feature values where
+     * the feature indices are equal.
+     *
      * @param x The first attribute set
      * @param y The second attribute set
      * @return the innerproduct
      */
-     public static double innerProduct(SortedMap<Integer, Double> x,
-             SortedMap<Integer, Double> y) {
-         double result = 0.0;
-         Iterator<Map.Entry<Integer, Double>> itrx = x.entrySet().iterator();
-         Iterator<Map.Entry<Integer, Double>> itry = y.entrySet().iterator();
-         Map.Entry<Integer, Double> xEntry = null;
-         Map.Entry<Integer, Double> yEntry = null;
-         while (itrx.hasNext() & itry.hasNext()) {
-             if (xEntry == null) xEntry = itrx.next();
-             if (yEntry == null) yEntry = itry.next();
-             if (xEntry.getKey().compareTo(yEntry.getKey()) < 0) {
-                 xEntry = null;
-             } else if (xEntry.getKey().compareTo(yEntry.getKey()) > 0) {
-                 yEntry = null;
-             } else {
-                 result += xEntry.getValue() * yEntry.getValue();
-                 xEntry = null;
-                 yEntry = null;
-             }
-         }
-         return result;
-     }
+    public static double innerProduct(SortedMap<Integer, Double> x,
+            SortedMap<Integer, Double> y) {
+        double result = 0.0;
+        Iterator<Map.Entry<Integer, Double>> itrx = x.entrySet().iterator();
+        Iterator<Map.Entry<Integer, Double>> itry = y.entrySet().iterator();
+        Map.Entry<Integer, Double> xEntry = null;
+        Map.Entry<Integer, Double> yEntry = null;
+        while (itrx.hasNext() & itry.hasNext()) {
+            if (xEntry == null) {
+                xEntry = itrx.next();
+            }
+            if (yEntry == null) {
+                yEntry = itry.next();
+            }
+            if (xEntry.getKey().compareTo(yEntry.getKey()) < 0) {
+                xEntry = null;
+            } else if (xEntry.getKey().compareTo(yEntry.getKey()) > 0) {
+                yEntry = null;
+            } else {
+                result += xEntry.getValue() * yEntry.getValue();
+                xEntry = null;
+                yEntry = null;
+            }
+        }
+        return result;
+    }
 
-     /**
-      * Method to convert an attributeSet to an array of svm_node.
-      * @param attributeSet The attribute set to be converted
-      * @return The equivalent array of svm_node.
-      */    
-     public static svm_node[] convereToSVMNode(SortedMap<Integer, Double> attributeSet) {
+    /**
+     * Method to convert an attributeSet to an array of svm_node.
+     *
+     * @param attributeSet The attribute set to be converted
+     * @return The equivalent array of svm_node.
+     */
+    public static svm_node[] convereToSVMNode(SortedMap<Integer, Double> attributeSet) {
         List<svm_node> svm_node_list = new ArrayList<>();
         attributeSet.forEach((Integer k, Double v) -> {
             svm_node node = new svm_node();
@@ -478,6 +504,24 @@ public class Util {
             svm_node_list.add(node);
         });
         return svm_node_list.toArray(new svm_node[svm_node_list.size()]);
+    }
+
+    public static void outputFile(File modelParent, String name, Object object) {
+        File outFile = new File(modelParent, name);
+        try (final ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outFile))) {
+            oos.writeObject(object);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error writing " + outFile.getPath(), ex);
+        }
+    }
+
+    public static Object readFile(File modelParent, String name) {
+        File inputFile = new File(modelParent, name);
+        try (final ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputFile))) {
+            return ois.readObject();
+        } catch (ClassNotFoundException | IOException ioex) {
+            throw new RuntimeException("Error reading " + inputFile.getPath(), ioex);
+        }
     }
 
 }

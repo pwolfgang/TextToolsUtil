@@ -36,41 +36,50 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
+import javax.sql.DataSource;
 
 /**
  * A simple data source for getting database connections.
  */
-public class SimpleDataSource {
+public class SimpleDataSource implements DataSource, AutoCloseable {
+
+    private final String url;
+    private String username;
+    private String password;
+    private int loginTimeout;
 
     /**
      * Initializes the data source.
      *
      * @param fileName the name of the property file that contains the database
      * driver, URL, username, and password.
-     * @throws java.io.IOException Loading the properties.
-     * @throws java.lang.ClassNotFoundException Error in locating driver.
      */
-    public SimpleDataSource(String fileName)
-            throws IOException, ClassNotFoundException {
-        File file = new File(fileName);
-        Properties props = new Properties();
-        FileInputStream in = new FileInputStream(file);
-        props.load(in);
+    public SimpleDataSource(String fileName) {
+        try {
+            File file = new File(fileName);
+            Properties props = new Properties();
+            FileInputStream in = new FileInputStream(file);
+            props.load(in);
 
-        String driver = props.getProperty("jdbc.driver");
-        url = props.getProperty("jdbc.url");
-        username = props.getProperty("jdbc.username");
-        password = props.getProperty("jdbc.password");
-        if (username == null) {
-            username = "";
-        }
-        if (password == null) {
-            password = "";
-        }
+            String driver = props.getProperty("jdbc.driver");
+            url = props.getProperty("jdbc.url");
+            username = props.getProperty("jdbc.username");
+            password = props.getProperty("jdbc.password");
+            if (username == null) {
+                username = "";
+            }
+            if (password == null) {
+                password = "";
+            }
 
-        Class.forName(driver);
+            Class.forName(driver);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error creating simple datasource", ex);
+        }
     }
 
     /**
@@ -79,11 +88,53 @@ public class SimpleDataSource {
      * @return the database connection
      * @throws java.sql.SQLException If the username/password not recognized.
      */
+    @Override
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, username.trim(), password.trim());
     }
 
-    private final String url;
-    private String username;
-    private String password;
+    @Override
+    public void close() throws Exception {
+        // Do nothing
+    }
+    
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        return DriverManager.getConnection(url, username, password);
+    }
+
+    @Override
+    public int getLoginTimeout() {
+        return loginTimeout;
+    }
+
+    @Override
+    public void setLoginTimeout(int loginTimeout) {
+        this.loginTimeout = loginTimeout;
+    }
+
+    @Override
+    public PrintWriter getLogWriter() {
+        return null;
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter pw) {
+        // Do nothing.
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) {
+        return false;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) {
+        return null;
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
+    }
 }

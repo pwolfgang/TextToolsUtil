@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2018, Temple University
  * All rights reserved.
  *
@@ -31,51 +31,53 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.function.Predicate;
 
 /**
- *
+ * Predicate to select all, even, or odd items from a stream.
  * @author Paul Wolfgang
  */
-public class StopWord implements Serializable {
+public class EvenOddFilter implements Predicate<Object> {
 
-    private Set<String> wordList = new HashSet<>();
-    
+    private int counter;
+    private boolean both;
+    private int remander;
 
-    public StopWord(String language) {
-        String path = null;
-        if (language == null || language.isEmpty()) path = "META-INF/StopWordList.txt";
-        else if ("true".equalsIgnoreCase(language)) path = "META-INF/StopWordList.txt";
-        else if ("false".equalsIgnoreCase(language)) path = null;
-        else if ("0".equalsIgnoreCase(language)) path = null;
-        else path = "META-INF/stoplists/" + language + "/stop.txt";
-        InputStream is = null;
-        if (path != null) is = ClassLoader.getSystemResourceAsStream(path);
-        if (is != null) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    String[] words = line.split("\\|");
-                    words[0] = words[0].trim();
-                    if (!"".equals(words[0]) && !words[0].startsWith("#")) {
-                        wordList.add(words[0]);
-                    }
-                }
-            } catch (IOException ex) {
-                // Ignore for now
-            }
+    public enum TYPE {
+        BOTH, EVEN, ODD
+    }
+
+    /**
+     * Constructor.
+     * @param type BOTH select all, EVEN selects even, ODD selects odd.
+     */
+    public EvenOddFilter(TYPE type) {
+        counter = 0;
+        switch (type) {
+            case BOTH:
+                both = true;
+                break;
+            case EVEN:
+                both = false;
+                remander = 0;
+                break;
+            case ODD:
+                both = false;
+                remander = 1;
+                break;
         }
     }
-    
-    public boolean isStopWord(String word) {
-        return wordList.contains(word.trim());
+
+    /**
+     * Perform the test.
+     * @param o Ignored
+     * @return True if the item is selected.
+     */
+    @Override
+    public boolean test(Object o) {
+        if (both) {
+            return true;
+        }
+        return (counter++ % 2 == remander);
     }
 }

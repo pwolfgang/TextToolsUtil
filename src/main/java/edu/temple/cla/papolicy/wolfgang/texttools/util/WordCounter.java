@@ -34,6 +34,7 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -57,6 +58,10 @@ public class WordCounter implements Serializable {
         public void increment() {
             ++count;
         }
+        
+        public void add(int delta) {
+            count += delta;
+        }
 
         /**
          * Return the count
@@ -76,8 +81,11 @@ public class WordCounter implements Serializable {
             return Integer.toString(count);
         }
     }
+    
+    private Map<String, Double> laplaseProb = null;
     private final Map<String, Counter> wordMap = new HashMap<>();
     private int numWords = 0;
+    private int sum = 0;
 
     /**
      * Update the count for a word
@@ -93,6 +101,23 @@ public class WordCounter implements Serializable {
             count.increment();
             ++numWords;
     }
+    
+    /**
+     * Update the counts for each word in another counter.
+     * @param wordCounter 
+     */
+    public void updateCounts(WordCounter wordCounter) {
+        wordCounter.wordMap.forEach((w, c) -> {
+            Counter count = wordMap.get(w);
+            if (count == null) {
+                count = new Counter();
+                wordMap.put(w, count);
+            }
+            count.add(c.getCount());
+            numWords += c.getCount();
+        });
+        
+    }
 
     /**
      * Return the number of words seen
@@ -101,6 +126,15 @@ public class WordCounter implements Serializable {
      */
     public int getNumWords() {
         return numWords;
+    }
+    
+    public int getCount(String word) {
+        Counter c = wordMap.get(word);
+        if (c == null) {
+            return 0;
+        } else {
+            return c.getCount();
+        }
     }
 
     /**
@@ -117,6 +151,24 @@ public class WordCounter implements Serializable {
         } else {
             return 0.0;
         }
+    }
+    
+    
+    public Optional<Double> getLaplaseProb(String word) {
+        if (laplaseProb == null) {
+            laplaseProb = new HashMap<>();
+            sum = 0;
+            wordMap.forEach((w, c) -> {
+                int cP1 = c.getCount() + 1;
+                laplaseProb.put(w, (double)cP1);
+                sum += cP1;
+            });
+            laplaseProb.keySet().forEach((w) -> {
+                double countForWord = laplaseProb.get(w);
+                laplaseProb.put(w, countForWord/sum);
+            });
+        }
+        return Optional.ofNullable(laplaseProb.get(word));
     }
 
     /**
