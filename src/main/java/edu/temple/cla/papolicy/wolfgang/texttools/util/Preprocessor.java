@@ -66,6 +66,7 @@ public class Preprocessor {
      * @return A stream of stemmed words
      */
     public Stream<String> preprocess(String line) {
+        if (line != null) {
         return NOT_WORD.splitAsStream(line)
                 .filter(w -> !w.isEmpty())
                 .map(String::toLowerCase)
@@ -74,6 +75,9 @@ public class Preprocessor {
                 .filter(w -> !stopWord.isStopWord(w))
                 .map(stemmer)
                 .filter(w -> !w.isEmpty());
+        } else {
+            return Stream.empty();
+        }
     }
     
     private String stripSingleQuotes(String s) {

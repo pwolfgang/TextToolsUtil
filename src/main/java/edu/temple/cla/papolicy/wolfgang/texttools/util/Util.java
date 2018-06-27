@@ -42,8 +42,6 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -113,7 +111,7 @@ public class Util {
     }
 
     /**
-     * Method to read samples from a database
+     * Method to read samples from a database. Version used by CommonFrontEnd.
      *
      * @param datasource The datasource referencing the database
      * @param tableName The name of the table
@@ -134,11 +132,49 @@ public class Util {
             boolean computeMajor,
             boolean useEven,
             boolean useOdd) {
-        String query = "SELECT ("
+        return readFromDatabase (datasource, tableName, idColumn, textColumn, codeColumn, computeMajor, useEven, useOdd, null);
+    }
+    
+    /**
+     * Method to read samples from a database. Version for use by
+     * FindNearDuplicateClusters.
+     *
+     * @param datasource The datasource referencing the database
+     * @param tableName The name of the table
+     * @param idColumn The column containing the unique ID
+     * @param textColumn The column(s) containing the text
+     * @param codeColumn The column containing the code
+     * @param clusterColumn The column containing the cluster history
+     * @param computeMajor If true, the major code is computed
+     * @param useEven If true, even samples are returned
+     * @param useOdd If true, odd samples are returned
+     * @return A Stream of selected rows as a Map from column name to value.
+     */
+    public static Stream<Map<String, Object>>  readFromDatabase(
+            String datasource,
+            String tableName,
+            String idColumn,
+            String textColumn,
+            String codeColumn,
+            boolean computeMajor,
+            boolean useEven,
+            boolean useOdd,
+            String clusterColumn) {
+        String query;
+        if (clusterColumn == null) {
+            query = "SELECT ("
                 + idColumn + ") as theID, ("
                 + textColumn + ") as theText, ("
                 + codeColumn + ") as theCode FROM ("
                 + tableName + ")";
+        } else {
+            query = "SELECT ("
+                + idColumn + ") as theID, ("
+                + textColumn + ") as theText, ("
+                + codeColumn + ") as theCode, ("
+                + clusterColumn + ") FROM ("
+                + tableName + ")";
+        }
 
         try {
             SimpleDataSource sds = new SimpleDataSource(datasource);
@@ -175,103 +211,13 @@ public class Util {
         }
     }
 
-    /**
-     * Method to read samples from a database. Special version for use by
-     * FindNearDuplicateClusters.
-     *
-     * @param datasource The datasource referencing the database
-     * @param tableName The name of the table
-     * @param idColumn The column containing the unique ID
-     * @param textColumn The column(s) containing the text
-     * @param codeColumn The column containing the code
-     * @param clusterColumn The column containing the cluster history
-     * @param computeMajor If true, the major code is computed
-     * @param useEven If true, even samples are returned
-     * @param useOdd If true, odd samples are returned
-     * @param id List containing the ID's
-     * @param lines List containing the text lines
-     * @param ref List containing the code
-     * @param cluster List containing the cluster history
-     */
-    public static void readFromDatabase(
-            String datasource,
-            String tableName,
-            String idColumn,
-            String textColumn,
-            String codeColumn,
-            String clusterColumn,
-            boolean computeMajor,
-            boolean useEven,
-            boolean useOdd,
-            List<String> id,
-            List<String> lines,
-            List<String> ref,
-            List<Integer> cluster) {
-        id.clear();
-        lines.clear();
-        ref.clear();
-        String query = "SELECT ("
-                + idColumn + ") as theID, ("
-                + textColumn + ") as theText, ("
-                + codeColumn + ") as theCode, ("
-                + clusterColumn + ") as theCluster FROM ("
-                + tableName + ")";
-        try {
-            SimpleDataSource sds = new SimpleDataSource(datasource);
-            try (Connection conn = sds.getConnection();
-                    Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery(query)) {
-                System.out.println(query);
-                int counter = -1;
-                while (rs.next()) {
-                    ++counter;
-                    if ((!useEven && !useOdd)
-                            || (useEven && counter % 2 == 0)
-                            || (useOdd && counter % 2 == 1)) {
-                        String theID = rs.getString("theID");
-                        String theText = rs.getString("theText");
-                        theText = convertFromXML(theText);
-                        int code = rs.getInt("theCode");
-                        String theCluster = rs.getString("theCluster");
-                        if (theID != null) {
-                            id.add(theID);
-                            if (theText == null) {
-                                lines.add("");
-                            } else {
-                                lines.add(theText);
-                            }
-                            if (computeMajor) {
-                                code = code / 100;
-                            }
-                            ref.add(Integer.toString(code));
-                            if (theCluster == null) {
-                                cluster.add(null);
-                            } else {
-                                try {
-                                    int intCluster = Integer.parseInt(theCluster);
-                                    cluster.add(intCluster);
-                                } catch (NumberFormatException ex) {
-                                    // ignore this
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            LOGGER.error("Error reading from database", ex);
-            System.err.printf("Error reading from database %s%n", ex.getMessage());
-            System.exit(1);
-        }
-    }
-
     public static void updateClusterInDatabase(
             String datasource,
             String tableName,
             String idColumn,
             String clusterColumn,
             List<String> ids,
-            List<Integer> cluster) throws Exception {
+            List<Integer> cluster) {
         SimpleDataSource sds = new SimpleDataSource(datasource);
         String query = "update " + tableName + " set " + clusterColumn + "=? where " + idColumn + "=?";
         try (Connection conn = sds.getConnection();
@@ -284,6 +230,8 @@ public class Util {
                     stmt.executeUpdate();
                 }
             }
+        } catch (Exception ex) {
+            throw new RuntimeException("Error updateing cluster", ex);
         }
     }
 

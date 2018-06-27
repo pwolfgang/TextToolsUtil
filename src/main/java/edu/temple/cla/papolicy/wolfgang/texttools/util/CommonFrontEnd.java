@@ -62,9 +62,6 @@ public class CommonFrontEnd {
     @Option(names = "--code_column", required = true, description = "Column(s) containing the code")
     private String codeColumn;
 
-    @Option(names = "--feature_dir", description = "Directory where feature files are written")
-    private String featureDir = "SVM_Training_Features";
-
     @Option(names = "--use_even", description = "Use even numbered samples for training")
     private Boolean useEven = false;
 
@@ -79,8 +76,7 @@ public class CommonFrontEnd {
 
     @Option(names = "--do_stemming", arity = "0..1", description = "Pass all words through stemming algorithm")
     private String doStemming;
-
-
+    
     /**
      * Load the data from the database.
      * @param ids Output list of the ID column
@@ -179,13 +175,6 @@ public class CommonFrontEnd {
      */
     public String getCodeColumn() {
         return codeColumn;
-    }
-
-    /**
-     * @return the featureDir
-     */
-    public String getFeatureDir() {
-        return featureDir;
     }
 
     /**
