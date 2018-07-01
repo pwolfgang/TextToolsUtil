@@ -35,8 +35,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.StringJoiner;
+import java.util.TreeMap;
+import static java.util.stream.Collectors.*;
 import picocli.CommandLine.Option;
 
 /**
@@ -84,8 +86,10 @@ public class CommonFrontEnd {
      * @param vocabulary Output Vocabulary of the features
      * @param counts Output feature sets of the Text.
      */
-    public void loadData(List<String> ids, List<String> ref, Vocabulary vocabulary, List<WordCounter> counts) {
+    public void loadData(List<Map<String, Object>> theData, Map<String, Double> vocabCounts) {
         Preprocessor preprocessor = new Preprocessor(doStemming, removeStopWords);
+        theData.clear();
+        vocabCounts.clear();
         Util.readFromDatabase(dataSourceFileName,
                 tableName,
                 idColumn,
@@ -95,16 +99,15 @@ public class CommonFrontEnd {
                 useEven,
                 useOdd)
                 .forEach(m -> {
-                    ids.add((String) m.get("theID"));
-                    ref.add(Objects.toString(m.get("theCode")));
                     String line = (String) m.get("theText");
-                    WordCounter counter = new WordCounter();
-                    preprocessor.preprocess(line)
-                            .forEach(word -> {
-                                counter.updateCounts(word);
-                                vocabulary.updateCounts(word);
-                            });
-                    counts.add(counter);
+                    Map<String, Double> counts = preprocessor.preprocess(line)
+                            .collect(groupingBy(w -> w, 
+                                    TreeMap::new, 
+                                    reducing(0.0, e -> 1.0, Double::sum)));
+                    m.put("counts", counts);
+                    counts.forEach((k, v) -> vocabCounts.merge(k, v, Double::sum));
+                    m.remove("theText");
+                    theData.add(m);
                 });
     }
 
