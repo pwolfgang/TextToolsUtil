@@ -100,12 +100,11 @@ public class CommonFrontEnd {
                 useOdd)
                 .forEach(m -> {
                     String line = (String) m.get("theText");
-                    Map<String, Double> counts = preprocessor.preprocess(line)
-                            .collect(groupingBy(w -> w, 
-                                    TreeMap::new, 
-                                    reducing(0.0, e -> 1.0, Double::sum)));
+                    Map<String, Double> counts = new TreeMap<>();
+                    preprocessor.preprocess(line)
+                            .peek(w -> vocabCounts.merge(w, 1.0, Double::sum))
+                            .forEach(w -> counts.merge(w, 1.0, Double::sum));
                     m.put("counts", counts);
-                    counts.forEach((k, v) -> vocabCounts.merge(k, v, Double::sum));
                     m.remove("theText");
                     theData.add(m);
                 });
