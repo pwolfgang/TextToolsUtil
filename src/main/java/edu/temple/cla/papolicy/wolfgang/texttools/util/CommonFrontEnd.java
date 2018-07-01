@@ -102,8 +102,12 @@ public class CommonFrontEnd {
                     String line = (String) m.get("theText");
                     Map<String, Double> counts = new TreeMap<>();
                     preprocessor.preprocess(line)
-                            .peek(w -> vocabCounts.merge(w, 1.0, Double::sum))
-                            .forEach(w -> counts.merge(w, 1.0, Double::sum));
+                            .peek(w -> {vocabCounts.merge(w, 1.0, Double::sum);
+                                        vocabCounts.merge("TOTAL_WORDS", 1.0, Double::sum);
+                            })
+                            .forEach(w -> {counts.merge(w, 1.0, Double::sum);
+                                           counts.merge("TOTAL_WORDS", 1.0, Double::sum);
+                            });
                     m.put("counts", counts);
                     m.remove("theText");
                     theData.add(m);
