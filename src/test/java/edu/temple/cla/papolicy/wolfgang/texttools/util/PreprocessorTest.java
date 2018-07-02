@@ -31,12 +31,12 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import edu.temple.cla.papolicy.wolfgang.texttools.util.Preprocessor;
-import edu.temple.cla.papolicy.wolfgang.texttools.util.Vocabulary;
-import edu.temple.cla.papolicy.wolfgang.texttools.util.WordCounter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -85,8 +85,7 @@ public class PreprocessorTest {
     
     @Test
     public void testCreatingTrainingFeatures() {
-        List<WordCounter> counts = new ArrayList<>();
-        Vocabulary vocabulary = new Vocabulary();
+        Map<String, Double> totalCounts = new LinkedHashMap<>();
         List<String> lines = Arrays.asList (
                 "The quick brown fox jumps over the lazy dog.",
                 "Now is the time for all good men to come to the aid of the party.",
@@ -97,20 +96,12 @@ public class PreprocessorTest {
         lines.stream()
              .map(line -> preprocessor.preprocess(line))
              .forEach(words -> {
-                WordCounter counter = new WordCounter();
                 words.forEach(word -> {
-                    counter.updateCounts(word);
-                    vocabulary.updateCounts(word);
+                    totalCounts.merge(word, 1.0, Double::sum);
+                    totalCounts.merge("TOTAL_WORDS", 1.0, Double::sum);
                 });
-                counts.add(counter);
             });
-        vocabulary.computeProbabilities();
-        String wordCounterExpected = 
-                "[{quick -> 1, lazi -> 1, brown -> 1, dog -> 1, fox -> 1, jump -> 1}\n" +
-               ", {now -> 1, men -> 1, come -> 1, time -> 1, good -> 1, aid -> 1, parti -> 1}\n" +
-               ", {fast -> 1, slow -> 1, brown -> 1, dog -> 1, fox -> 1, jump -> 1}\n" +
-               ", {time -> 1, parti -> 1}\n" +
-                "]";
+        Vocabulary vocabulary = new Vocabulary(new WordCounter(totalCounts));
         String vocabularyExpected = 
                 "   1      quick 0.047619\n" +
                 "   2      brown 0.095238\n" +
@@ -127,7 +118,6 @@ public class PreprocessorTest {
                 "  13      parti 0.095238\n" +
                 "  14       slow 0.047619\n" +
                 "  15       fast 0.047619";
-        assertEquals(wordCounterExpected, counts.toString());
         assertEquals(vocabularyExpected, vocabulary.toString());
     }
             

@@ -34,11 +34,10 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.TreeMap;
-import static java.util.stream.Collectors.*;
 import picocli.CommandLine.Option;
 
 /**
@@ -100,7 +99,7 @@ public class CommonFrontEnd {
                 useOdd)
                 .forEach(m -> {
                     String line = (String) m.get("theText");
-                    Map<String, Double> counts = new TreeMap<>();
+                    Map<String, Double> counts = new HashMap<>();
                     preprocessor.preprocess(line)
                             .peek(w -> {vocabCounts.merge(w, 1.0, Double::sum);
                                         vocabCounts.merge("TOTAL_WORDS", 1.0, Double::sum);
