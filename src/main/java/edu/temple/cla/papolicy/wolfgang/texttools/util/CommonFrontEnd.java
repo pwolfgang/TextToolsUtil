@@ -121,10 +121,9 @@ public class CommonFrontEnd {
      *
      * @param tableName The name of the table
      * @param outputCodeCol The column where the results are set
-     * @param ids The list of ids
-     * @param cats The corresponding list of categories.
+     * @param cases The classification cases with newCode set.
      */
-    public void outputToDatabase(String tableName, String outputCodeCol, List<String> ids, List<Integer> cats) {
+    public void outputToDatabase(String tableName, String outputCodeCol, List<Map<String, Object>> cases) {
         try {
             SimpleDataSource sds = new SimpleDataSource(dataSourceFileName);
             try (final Connection conn = sds.getConnection();
@@ -133,9 +132,11 @@ public class CommonFrontEnd {
                 stmt.executeUpdate("CREATE TABLE NewCodes (ID char(11) primary key, Code int)");
                 StringBuilder stb = new StringBuilder("INSERT INTO NewCodes (ID, Code) VALUES");
                 StringJoiner sj = new StringJoiner(",\n");
-                for (int i = 0; i < ids.size(); i++) {
-                    sj.add(String.format("('%s', %d)", ids.get(i), cats.get(i)));
-                }
+                cases.forEach(c -> {
+                    String id = (String)c.get("ID");
+                    Integer newCode = (Integer)c.get("newCode");
+                    sj.add(String.format("('%s', %d)", id, newCode));
+                });
                 stb.append(sj);
                 stmt.executeUpdate(stb.toString());
                 stmt.executeUpdate("UPDATE " + tableName + " join NewCodes on " 
