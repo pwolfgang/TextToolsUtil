@@ -57,9 +57,8 @@ public class CommonFrontEndTest {
                 "--id_column", "ID",
                 "--text_column", "Abstract",
                 "--code_column", "Code");
-        Map<String, Double> vocabulary = new TreeMap<>();
         List<Map<String, Object>> counts = new ArrayList<>();
-        commonFrontEnd.loadData(counts, vocabulary);
+        Vocabulary vocabulary = commonFrontEnd.loadData(counts);
         System.out.println(counts);
         System.out.println(vocabulary);        
     }
