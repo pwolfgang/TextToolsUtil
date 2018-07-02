@@ -133,7 +133,7 @@ public class CommonFrontEnd {
                 StringBuilder stb = new StringBuilder("INSERT INTO NewCodes (ID, Code) VALUES");
                 StringJoiner sj = new StringJoiner(",\n");
                 cases.forEach(c -> {
-                    String id = (String)c.get("ID");
+                    String id = (String)c.get("theID");
                     Integer newCode = (Integer)c.get("newCode");
                     sj.add(String.format("('%s', %d)", id, newCode));
                 });
