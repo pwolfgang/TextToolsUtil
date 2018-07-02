@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -42,7 +43,7 @@ import picocli.CommandLine.Option;
 
 /**
  * Class to process selected command-line arguments and read the data from
- * a database.
+ * a database and to update the classification codes.
  * @author Paul Wolfgang
  */
 public class CommonFrontEnd {
@@ -79,16 +80,17 @@ public class CommonFrontEnd {
     private String doStemming;
     
     /**
-     * Load the data from the database.
-     * @param ids Output list of the ID column
-     * @param ref Output list of the Code column
-     * @param vocabulary Output Vocabulary of the features
-     * @param counts Output feature sets of the Text.
+     * Load the data from the database. This method reads training cases and
+     * classification cases from the database. It then converts the text into
+     * a WordCounter containing the individual filtered words. It also computes
+     * a Vocabulary of all filtered words.
+     * @param theData The individual training/classification cases.
+     * @return The Vocabulary of all training/classification cases.
      */
-    public void loadData(List<Map<String, Object>> theData, Map<String, Double> vocabCounts) {
+    public Vocabulary loadData(List<Map<String, Object>> theData) {
         Preprocessor preprocessor = new Preprocessor(doStemming, removeStopWords);
         theData.clear();
-        vocabCounts.clear();
+        Map<String, Double> vocabCounts = new LinkedHashMap<>();
         Util.readFromDatabase(dataSourceFileName,
                 tableName,
                 idColumn,
@@ -107,10 +109,11 @@ public class CommonFrontEnd {
                             .forEach(w -> {counts.merge(w, 1.0, Double::sum);
                                            counts.merge("TOTAL_WORDS", 1.0, Double::sum);
                             });
-                    m.put("counts", counts);
+                    m.put("counts", new WordCounter(counts));
                     m.remove("theText");
                     theData.add(m);
                 });
+        return new Vocabulary(new WordCounter(vocabCounts));
     }
 
     /**
