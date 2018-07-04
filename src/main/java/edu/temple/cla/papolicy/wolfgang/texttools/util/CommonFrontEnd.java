@@ -109,14 +109,15 @@ public class CommonFrontEnd {
     }
 
     /**
-     * Method to write the classification results to the database
+     * Method to write the results to the database. This could be either the
+     * computed classification codes, or the cluster ids.
      *
      * @param tableName The name of the table
-     * @param outputCodeCol The column where the results are set
+     * @param outputCol The column where the results are set
      * @param ids The list of ids
-     * @param cats The corresponding list of categories.
+     * @param results The corresponding list of results.
      */
-    public void outputToDatabase(String tableName, String outputCodeCol, List<String> ids, List<Integer> cats) {
+    public void outputToDatabase(String tableName, String outputCol, List<String> ids, List<Integer> results) {
         try {
             SimpleDataSource sds = new SimpleDataSource(dataSourceFileName);
             try (final Connection conn = sds.getConnection();
@@ -126,13 +127,13 @@ public class CommonFrontEnd {
                 StringBuilder stb = new StringBuilder("INSERT INTO NewCodes (ID, Code) VALUES");
                 StringJoiner sj = new StringJoiner(",\n");
                 for (int i = 0; i < ids.size(); i++) {
-                    sj.add(String.format("('%s', %d)", ids.get(i), cats.get(i)));
+                    sj.add(String.format("('%s', %d)", ids.get(i), results.get(i)));
                 }
                 stb.append(sj);
                 stmt.executeUpdate(stb.toString());
                 stmt.executeUpdate("UPDATE " + tableName + " join NewCodes on " 
                         + tableName + ".ID=NewCodes.ID SET " + tableName + "." 
-                        + outputCodeCol + "=NewCodes.Code");
+                        + outputCol + "=NewCodes.Code");
             } catch (SQLException ex) {
                 throw ex;
             }
