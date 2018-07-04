@@ -118,7 +118,7 @@ public class Vocabulary implements Serializable {
     }
     
     public double getLaplaseProb(String word) {
-        return counter.getLaplaseProb(word).orElse(Double.MIN_NORMAL);
+        return counter.getLaplaseProb(word).orElse(1.0/(counter.getNumWords() + counter.getNumUniqueWords() - 1));
     }
     
     public Integer getWordCount(String word) {

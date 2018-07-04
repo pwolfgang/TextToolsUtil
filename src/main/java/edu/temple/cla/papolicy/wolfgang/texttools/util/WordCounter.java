@@ -47,9 +47,20 @@ import java.util.StringJoiner;
 public class WordCounter implements Serializable {
    
     private final Map<String, Double> wordMap;
+    private int numDocs;
+    
+    /**
+     * Get the The count of documents represented by this WordCounter. 
+     * 
+     * @return The count of documents represented by this WordCounter. 
+     */
+    public int getNumDocs() {
+        return numDocs;
+    }
     
     public WordCounter(Map<String, Double> wordMap) {
         this.wordMap = wordMap;
+        numDocs = 1;
     }
     
     public WordCounter() {
@@ -62,12 +73,6 @@ public class WordCounter implements Serializable {
     }
 
     /**
-     * Update the count for a word
-     *
-     * @param word The list of tokens
-     */
-   
-    /**
      * Update the counts for each word in another counter.
      * @param wordCounter 
      */
@@ -75,6 +80,7 @@ public class WordCounter implements Serializable {
         wordCounter.wordMap.forEach((w, c) -> {
             wordMap.merge(w, c, Double::sum);
         });
+        numDocs++;
     }
 
     /**
@@ -84,6 +90,10 @@ public class WordCounter implements Serializable {
      */
     public int getNumWords() {
         return wordMap.get("TOTAL_WORDS").intValue();
+    }
+    
+    public int getNumUniqueWords() {
+        return wordMap.keySet().size();
     }
     
     public int getCount(String word) {
