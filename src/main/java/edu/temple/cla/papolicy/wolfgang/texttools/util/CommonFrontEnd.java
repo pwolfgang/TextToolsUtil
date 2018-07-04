@@ -117,31 +117,34 @@ public class CommonFrontEnd {
     }
 
     /**
-     * Method to write the classification results to the database
+     * Method to write the results to the database. This could be either the
+     * computed classification codes, or the cluster ids.
      *
      * @param tableName The name of the table
-     * @param outputCodeCol The column where the results are set
-     * @param cases The classification cases with newCode set.
+     * @param outputCol The column where the results are set
+     * @param cases The classification cases with newValue set.
+     * @param resultKey The resultKey in the case map that references the result.
      */
-    public void outputToDatabase(String tableName, String outputCodeCol, List<Map<String, Object>> cases) {
+    public void outputToDatabase(String tableName, String outputCol, 
+            List<Map<String, Object>> cases, String resultKey) {
         try {
             SimpleDataSource sds = new SimpleDataSource(dataSourceFileName);
             try (final Connection conn = sds.getConnection();
                     final Statement stmt = conn.createStatement()) {
                 stmt.executeUpdate("DROP TABLE IF EXISTS NewCodes");
-                stmt.executeUpdate("CREATE TABLE NewCodes (ID char(11) primary key, Code int)");
-                StringBuilder stb = new StringBuilder("INSERT INTO NewCodes (ID, Code) VALUES");
+                stmt.executeUpdate("CREATE TABLE NewValues (ID char(11) primary key, Value int)");
+                StringBuilder stb = new StringBuilder("INSERT INTO NewValues (ID, Value) VALUES");
                 StringJoiner sj = new StringJoiner(",\n");
                 cases.forEach(c -> {
                     String id = (String)c.get("theID");
-                    Integer newCode = (Integer)c.get("newCode");
-                    sj.add(String.format("('%s', %d)", id, newCode));
+                    Integer newValue = (Integer)c.get(resultKey);
+                    sj.add(String.format("('%s', %d)", id, newValue));
                 });
                 stb.append(sj);
                 stmt.executeUpdate(stb.toString());
-                stmt.executeUpdate("UPDATE " + tableName + " join NewCodes on " 
-                        + tableName + ".ID=NewCodes.ID SET " + tableName + "." 
-                        + outputCodeCol + "=NewCodes.Code");
+                stmt.executeUpdate("UPDATE " + tableName + " join NewValues on " 
+                        + tableName + ".ID=NewValues.ID SET " + tableName + "." 
+                        + outputCol + "=NewValues.Value");
             } catch (SQLException ex) {
                 throw ex;
             }
