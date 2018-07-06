@@ -131,7 +131,7 @@ public class CommonFrontEnd {
             SimpleDataSource sds = new SimpleDataSource(dataSourceFileName);
             try (final Connection conn = sds.getConnection();
                     final Statement stmt = conn.createStatement()) {
-                stmt.executeUpdate("DROP TABLE IF EXISTS NewCodes");
+                stmt.executeUpdate("DROP TABLE IF EXISTS NewValues");
                 stmt.executeUpdate("CREATE TABLE NewValues (ID char(11) primary key, Value int)");
                 StringBuilder stb = new StringBuilder("INSERT INTO NewValues (ID, Value) VALUES");
                 StringJoiner sj = new StringJoiner(",\n");
