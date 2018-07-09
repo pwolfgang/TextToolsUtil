@@ -132,7 +132,8 @@ public class Util {
             boolean computeMajor,
             boolean useEven,
             boolean useOdd) {
-        return readFromDatabase (datasource, tableName, idColumn, textColumn, codeColumn, computeMajor, useEven, useOdd, null);
+        return readFromDatabase (datasource, tableName, idColumn, textColumn, 
+                codeColumn, computeMajor, useEven, useOdd, null);
     }
     
     /**
@@ -274,12 +275,11 @@ public class Util {
      * @param out The print writer to write the line to
      * @param value The value of this featureMap
      * @param featureMap The SortedMap containing the features
-     * @throws java.io.IOException If error in writing file.
      */
     public static void writeFeatureLine(
             PrintWriter out,
             int value,
-            SortedMap<Integer, Double> featureMap) throws IOException {
+            SortedMap<Integer, Double> featureMap) {
         out.print(value);
         featureMap.forEach((k, v) -> out.print(" " + k + ":" + v));
         out.println();
