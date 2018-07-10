@@ -42,7 +42,6 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +52,6 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
-import tw.edu.ntu.csie.libsvm.svm_node;
 
 /**
  * Class to contain static utility methods
@@ -437,22 +435,6 @@ public class Util {
         return result;
     }
 
-    /**
-     * Method to convert an attributeSet to an array of svm_node.
-     *
-     * @param attributeSet The attribute set to be converted
-     * @return The equivalent array of svm_node.
-     */
-    public static svm_node[] convereToSVMNode(SortedMap<Integer, Double> attributeSet) {
-        List<svm_node> svm_node_list = new ArrayList<>();
-        attributeSet.forEach((Integer k, Double v) -> {
-            svm_node node = new svm_node();
-            node.index = k;
-            node.value = v;
-            svm_node_list.add(node);
-        });
-        return svm_node_list.toArray(new svm_node[svm_node_list.size()]);
-    }
 
     public static void outputFile(File modelParent, String name, Object object) {
         File outFile = new File(modelParent, name);
