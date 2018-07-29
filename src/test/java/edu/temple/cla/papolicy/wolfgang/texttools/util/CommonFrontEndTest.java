@@ -33,6 +33,8 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.junit.Test;
 import picocli.CommandLine;
 
@@ -55,15 +57,10 @@ public class CommonFrontEndTest {
                 "--id_column", "ID",
                 "--text_column", "Abstract",
                 "--code_column", "Code");
-        List<String> ref = new ArrayList<>();
-        List<String> ids = new ArrayList<>();
-        Vocabulary vocabulary = new Vocabulary();
-        List<WordCounter> counts = new ArrayList();
-        commonFrontEnd.loadData(ids, ref, vocabulary, counts);
-        System.out.println(ids);
-        System.out.println(ref);
+        List<Map<String, Object>> counts = new ArrayList<>();
+        Vocabulary vocabulary = commonFrontEnd.loadData(counts);
         System.out.println(counts);
-        
+        System.out.println(vocabulary);        
     }
     
 }

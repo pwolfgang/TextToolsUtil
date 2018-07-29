@@ -34,6 +34,7 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -44,79 +45,42 @@ import java.util.StringJoiner;
  * @author Paul Wolfgang
  */
 public class WordCounter implements Serializable {
-
+   
+    private final Map<String, Double> wordMap;
+    private int numDocs;
+    
     /**
-     * A class to encapsulate a counter
+     * Get the The count of documents represented by this WordCounter. 
+     * 
+     * @return The count of documents represented by this WordCounter. 
      */
-    private static class Counter implements Serializable {
-
-        private int count = 0;
-
-        /**
-         * Increment the count
-         */
-        public void increment() {
-            ++count;
-        }
-        
-        public void add(int delta) {
-            count += delta;
-        }
-
-        /**
-         * Return the count
-         *
-         * @return the count
-         */
-        public int getCount() {
-            return count;
-        }
-        
-        /**
-         * Return the count as a string.
-         * @return The count converted to a string.
-         */
-        @Override
-        public String toString() {
-            return Integer.toString(count);
-        }
+    public int getNumDocs() {
+        return numDocs;
     }
     
-    private Map<String, Double> laplaseProb = null;
-    private final Map<String, Counter> wordMap = new HashMap<>();
-    private int numWords = 0;
-    private int sum = 0;
-
-    /**
-     * Update the count for a word
-     *
-     * @param word The list of tokens
-     */
+    public WordCounter(Map<String, Double> wordMap) {
+        this.wordMap = wordMap;
+        numDocs = 1;
+    }
+    
+    public WordCounter() {
+        wordMap = new HashMap<>();
+    }
+    
     public void updateCounts(String word) {
-            Counter count = wordMap.get(word);
-            if (count == null) {
-                count = new Counter();
-                wordMap.put(word, count);
-            }
-            count.increment();
-            ++numWords;
+        wordMap.merge(word, 1.0, Double::sum);
+        wordMap.merge("TOTAL_WORDS", 1.0, Double::sum);
     }
-    
+
     /**
      * Update the counts for each word in another counter.
      * @param wordCounter 
      */
     public void updateCounts(WordCounter wordCounter) {
         wordCounter.wordMap.forEach((w, c) -> {
-            Counter count = wordMap.get(w);
-            if (count == null) {
-                count = new Counter();
-                wordMap.put(w, count);
-            }
-            count.add(c.getCount());
-            numWords += c.getCount();
+            wordMap.merge(w, c, Double::sum);
         });
-        
+        numDocs++;
     }
 
     /**
@@ -125,16 +89,15 @@ public class WordCounter implements Serializable {
      * @return The number of words
      */
     public int getNumWords() {
-        return numWords;
+        return wordMap.get("TOTAL_WORDS").intValue();
+    }
+    
+    public int getNumUniqueWords() {
+        return wordMap.keySet().size();
     }
     
     public int getCount(String word) {
-        Counter c = wordMap.get(word);
-        if (c == null) {
-            return 0;
-        } else {
-            return c.getCount();
-        }
+        return wordMap.getOrDefault(word, 0.0).intValue();
     }
 
     /**
@@ -145,30 +108,19 @@ public class WordCounter implements Serializable {
      * @return The probability of a given word
      */
     public double getProb(String word) {
-        Counter count = wordMap.get(word);
-        if (count != null) {
-            return (double) count.getCount() / (double) numWords;
-        } else {
-            return 0.0;
-        }
+        double numWords = wordMap.get("TOTAL_WORDS");
+        return wordMap.getOrDefault(word, 0.0)/numWords;
     }
     
     
     public Optional<Double> getLaplaseProb(String word) {
-        if (laplaseProb == null) {
-            laplaseProb = new HashMap<>();
-            sum = 0;
-            wordMap.forEach((w, c) -> {
-                int cP1 = c.getCount() + 1;
-                laplaseProb.put(w, (double)cP1);
-                sum += cP1;
-            });
-            laplaseProb.keySet().forEach((w) -> {
-                double countForWord = laplaseProb.get(w);
-                laplaseProb.put(w, countForWord/sum);
-            });
+        if (!wordMap.containsKey(word)) {
+            return Optional.empty();
         }
-        return Optional.ofNullable(laplaseProb.get(word));
+        double totalWords = wordMap.get("TOTAL_WORDS");
+        double numWords = wordMap.keySet().size();
+        double denom = totalWords + numWords - 1.0;
+        return Optional.of((wordMap.get(word) + 1)/denom);
     }
 
     /**
@@ -189,5 +141,24 @@ public class WordCounter implements Serializable {
         StringJoiner sj = new StringJoiner(", ", "{", "}\n");
         wordMap.forEach((k, v) -> sj.add(String.format("%s -> %s", k, v)));
         return sj.toString();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (o == this) return true;
+        if (o.getClass() == this.getClass()) {
+            WordCounter other = (WordCounter)o;
+            return wordMap.equals(other.wordMap);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.wordMap);
+        return hash;
     }
 }

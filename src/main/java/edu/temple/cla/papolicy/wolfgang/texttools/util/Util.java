@@ -42,7 +42,6 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +52,6 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
-import tw.edu.ntu.csie.libsvm.svm_node;
 
 /**
  * Class to contain static utility methods
@@ -132,7 +130,8 @@ public class Util {
             boolean computeMajor,
             boolean useEven,
             boolean useOdd) {
-        return readFromDatabase (datasource, tableName, idColumn, textColumn, codeColumn, computeMajor, useEven, useOdd, null);
+        return readFromDatabase (datasource, tableName, idColumn, textColumn, 
+                codeColumn, computeMajor, useEven, useOdd, null);
     }
     
     /**
@@ -211,29 +210,6 @@ public class Util {
         }
     }
 
-    public static void updateClusterInDatabase(
-            String datasource,
-            String tableName,
-            String idColumn,
-            String clusterColumn,
-            List<String> ids,
-            List<Integer> cluster) {
-        SimpleDataSource sds = new SimpleDataSource(datasource);
-        String query = "update " + tableName + " set " + clusterColumn + "=? where " + idColumn + "=?";
-        try (Connection conn = sds.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(query)) {
-            for (int i = 0; i < ids.size(); i++) {
-                Integer newClusterValue = cluster.get(i);
-                if (newClusterValue != null) {
-                    stmt.setInt(1, newClusterValue);
-                    stmt.setString(2, ids.get(i));
-                    stmt.executeUpdate();
-                }
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Error updateing cluster", ex);
-        }
-    }
 
     /**
      * Method to compute attribute values. The attribute values is the
@@ -274,12 +250,11 @@ public class Util {
      * @param out The print writer to write the line to
      * @param value The value of this featureMap
      * @param featureMap The SortedMap containing the features
-     * @throws java.io.IOException If error in writing file.
      */
     public static void writeFeatureLine(
             PrintWriter out,
             int value,
-            SortedMap<Integer, Double> featureMap) throws IOException {
+            SortedMap<Integer, Double> featureMap) {
         out.print(value);
         featureMap.forEach((k, v) -> out.print(" " + k + ":" + v));
         out.println();
@@ -437,22 +412,6 @@ public class Util {
         return result;
     }
 
-    /**
-     * Method to convert an attributeSet to an array of svm_node.
-     *
-     * @param attributeSet The attribute set to be converted
-     * @return The equivalent array of svm_node.
-     */
-    public static svm_node[] convereToSVMNode(SortedMap<Integer, Double> attributeSet) {
-        List<svm_node> svm_node_list = new ArrayList<>();
-        attributeSet.forEach((Integer k, Double v) -> {
-            svm_node node = new svm_node();
-            node.index = k;
-            node.value = v;
-            svm_node_list.add(node);
-        });
-        return svm_node_list.toArray(new svm_node[svm_node_list.size()]);
-    }
 
     public static void outputFile(File modelParent, String name, Object object) {
         File outFile = new File(modelParent, name);

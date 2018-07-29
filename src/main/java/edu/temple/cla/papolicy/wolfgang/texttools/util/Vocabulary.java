@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.StringJoiner;
 import java.util.TreeMap;
@@ -66,33 +67,25 @@ public class Vocabulary implements Serializable {
     /** Flag to indicate that new words are not to be entered into the vocabulary */
     private boolean frozen = false;
     
-    /** Construct an empty Vocabulary */
-    public Vocabulary() {
+    /** Construct a Vocabulary from a WordCounter */
+    public Vocabulary(WordCounter counter) {
         allWords = new ArrayList<>();
         allWords.add(0.0); // there is no word zero
-
         wordIds = new HashMap<>();
         idWords = new ArrayList<>();
         idWords.add(""); // there is no word zero
         wordIds.put("", 0);
-        counter = new WordCounter();
+        this.counter = counter;
+        counter.getWords().forEach(word -> {
+            if (!"TOTAL_WORDS".equals(word)) {
+                int thisWordId = idWords.size();
+                wordIds.put(word, thisWordId);
+                idWords.add(word);
+                allWords.add(counter.getProb(word));
+            }
+        });
     }
 
-    /** Method to add words to the vocabulary and update the counts 
-     * @param word A list of words to be added
-     */
-    public void updateCounts(String word) {
-        if (!frozen) {
-                Integer thisWordID = wordIds.get(word);
-                if (thisWordID == null) {
-                    thisWordID = idWords.size();
-                    wordIds.put(word, thisWordID);
-                    idWords.add(word);
-                }
-            counter.updateCounts(word);
-        }
-    }
-    
     /** Method to compute the probability of each word the vocabulary.
      * After this method is called, the vocabulary is frozen.
      */
@@ -125,7 +118,7 @@ public class Vocabulary implements Serializable {
     }
     
     public double getLaplaseProb(String word) {
-        return counter.getLaplaseProb(word).orElse(Double.MIN_NORMAL);
+        return counter.getLaplaseProb(word).orElse(1.0/(counter.getNumWords() + counter.getNumUniqueWords() - 1));
     }
     
     public Integer getWordCount(String word) {
@@ -191,6 +184,27 @@ public class Vocabulary implements Serializable {
             sj.add(String.format("%4s %10s %f", i, idWords.get(i), allWords.get(i)));
         }
         return sj.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 29 * hash + Objects.hashCode(this.idWords);
+        hash = 29 * hash + Objects.hashCode(this.counter);
+        return hash;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (o == this) return true;
+        if (o.getClass() == this.getClass()) {
+            Vocabulary other = (Vocabulary) o;
+            return other.counter.equals(counter)
+                    && other.idWords.equals(idWords);
+        } else {
+            return false;
+        }
     }
 
 }
