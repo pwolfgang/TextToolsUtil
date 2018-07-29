@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,15 +134,20 @@ public class CommonFrontEnd {
                     final Statement stmt = conn.createStatement()) {
                 stmt.executeUpdate("DROP TABLE IF EXISTS NewValues");
                 stmt.executeUpdate("CREATE TABLE NewValues (ID char(11) primary key, Value int)");
-                StringBuilder stb = new StringBuilder("INSERT INTO NewValues (ID, Value) VALUES");
-                StringJoiner sj = new StringJoiner(",\n");
-                cases.forEach(c -> {
-                    String id = (String)c.get("theID");
-                    Integer newValue = (Integer)c.get(resultKey);
-                    sj.add(String.format("('%s', %d)", id, newValue));
-                });
-                stb.append(sj);
-                stmt.executeUpdate(stb.toString());
+                String insertStatement = "INSERT INTO NewValues (ID, Value) VALUES";
+                Iterator<Map<String, Object>> itr = cases.iterator();
+                while (itr.hasNext()) {
+                    StringJoiner sj = new StringJoiner(",\n");
+                    while (itr.hasNext() && sj.length() < 100000) {
+                        Map<String, Object> c = itr.next();
+                        String id = (String)c.get("theID");
+                        Integer newValue = (Integer)c.get(resultKey);
+                        sj.add(String.format("('%s', %d)", id, newValue));
+                    }
+                    StringBuilder stb = new StringBuilder(insertStatement);
+                    stb.append(sj);
+                    stmt.executeUpdate(stb.toString());
+                }
                 stmt.executeUpdate("UPDATE " + tableName + " join NewValues on " 
                         + tableName + ".ID=NewValues.ID SET " + tableName + "." 
                         + outputCol + "=NewValues.Value");

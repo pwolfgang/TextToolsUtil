@@ -210,29 +210,6 @@ public class Util {
         }
     }
 
-    public static void updateClusterInDatabase(
-            String datasource,
-            String tableName,
-            String idColumn,
-            String clusterColumn,
-            List<String> ids,
-            List<Integer> cluster) {
-        SimpleDataSource sds = new SimpleDataSource(datasource);
-        String query = "update " + tableName + " set " + clusterColumn + "=? where " + idColumn + "=?";
-        try (Connection conn = sds.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(query)) {
-            for (int i = 0; i < ids.size(); i++) {
-                Integer newClusterValue = cluster.get(i);
-                if (newClusterValue != null) {
-                    stmt.setInt(1, newClusterValue);
-                    stmt.setString(2, ids.get(i));
-                    stmt.executeUpdate();
-                }
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Error updateing cluster", ex);
-        }
-    }
 
     /**
      * Method to compute attribute values. The attribute values is the
