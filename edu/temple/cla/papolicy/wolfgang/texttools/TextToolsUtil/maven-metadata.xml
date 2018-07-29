@@ -3,9 +3,10 @@
   <groupId>edu.temple.cla.papolicy.wolfgang.texttools</groupId>
   <artifactId>TextToolsUtil</artifactId>
   <versioning>
+    <release>1.3.1</release>
     <versions>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.3.1</version>
     </versions>
-    <lastUpdated>20180705125608</lastUpdated>
+    <lastUpdated>20180729161509</lastUpdated>
   </versioning>
 </metadata>
