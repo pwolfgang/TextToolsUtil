@@ -44,6 +44,9 @@ import java.util.Set;
  * The stopword lists were extracted from 
  * <a href="http://snowball.tartarus.org/dist/snowball_all.tgz"> 
  * http://snowball.tartarus.org/dist/snowball_all.tgz </a>
+ * The following languages are supported: Danish, Dutch, English,
+ * Finnish, French, German, Hungarian, Italian, Norwegian, Portuguese
+ * Russian, Spanish, and Swedish.
  * @author Paul Wolfgang
  */
 public class StopWord {
