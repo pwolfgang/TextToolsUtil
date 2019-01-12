@@ -32,24 +32,34 @@
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
- *
+ * Class to provide language specific StopWord lists.
+ * The stopword lists were extracted from 
+ * <a href="http://snowball.tartarus.org/dist/snowball_all.tgz"> 
+ * http://snowball.tartarus.org/dist/snowball_all.tgz </a>
  * @author Paul Wolfgang
  */
-public class StopWord implements Serializable {
+public class StopWord {
 
-    private Set<String> wordList = new HashSet<>();
+    Set<String> wordList = new HashSet<>();
     
-
+    /**
+     * Initialize the wordList with the selected language.
+     * If no language is provided, or if the language is "true", then the
+     * default list is the one provided by Chris Buckley and Gerard Salton 
+     * at Cornell University.  If the language is "false" or "0", then
+     * no StopWord filtering is performed.  
+     * @param language 
+     */
     public StopWord(String language) {
-        String path = null;
+        String path;
         if (language == null || language.isEmpty()) path = "META-INF/StopWordList.txt";
         else if ("true".equalsIgnoreCase(language)) path = "META-INF/StopWordList.txt";
         else if ("false".equalsIgnoreCase(language)) path = null;
@@ -58,20 +68,16 @@ public class StopWord implements Serializable {
         InputStream is = null;
         if (path != null) is = ClassLoader.getSystemResourceAsStream(path);
         if (is != null) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    String[] words = line.split("\\|");
-                    words[0] = words[0].trim();
-                    if (!"".equals(words[0]) && !words[0].startsWith("#")) {
-                        wordList.add(words[0]);
-                    }
-                }
-            } catch (IOException ex) {
-                // Ignore for now
-            }
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            br.lines()
+              .map(l -> l.split("\\s*\\|\\s*"))
+              .map(Arrays::stream)
+              .map(s -> s.findFirst())
+              .map(o -> o.orElse(""))
+              .filter(s -> !s.isEmpty())
+              .map(s -> s.split("\\s+"))
+              .flatMap(Arrays::stream)
+              .forEach(w -> wordList.add(w));
         }
     }
     
