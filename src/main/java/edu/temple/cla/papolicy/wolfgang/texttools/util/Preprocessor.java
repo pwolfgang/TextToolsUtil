@@ -80,6 +80,11 @@ public class Preprocessor {
         }
     }
     
+    /**
+     * Strip leading and trailing single quotes from a string.
+     * @param s The string to be processed
+     * @return The string with leading and trailing single quotes removed.
+     */
     private String stripSingleQuotes(String s) {
         char[] chars = s.toCharArray();
         int firstIndex = 0;
