@@ -93,4 +93,30 @@ public class StopWordTest {
         boolean result = stopWord.isStopWord(word);
         assertEquals(expResult, result);
     }
+    
+    /**
+     * Test to see if all languages are readable.
+     */
+    @Test
+    public void testLanguages() {
+        String[] languages = {
+        "danish",
+        "dutch",
+        "english",
+        "finnish",
+        "french",
+        "german",
+        "hungarian",
+        "italian",
+        "norwegian",
+        "portuguese",
+        "russian",
+        "spanish",
+        "swedish"    
+        };
+        for (String language : languages) {
+            new StopWord(language);
+        }
+    }
+    
 }
