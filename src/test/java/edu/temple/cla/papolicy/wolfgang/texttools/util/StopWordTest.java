@@ -78,7 +78,7 @@ public class StopWordTest {
         String word = "yourself";
         boolean expResult = true;
         boolean result = stopWord.isStopWord(word);
-        assertEquals(expResult, result);
+        assertTrue("'yourself' is a stopword", result);
     }
 
     /**
@@ -91,7 +91,7 @@ public class StopWordTest {
         String word = "arf";
         boolean expResult = false;
         boolean result = stopWord.isStopWord(word);
-        assertEquals(expResult, result);
+        assertFalse("'arf' is not a stopword", result);
     }
     
     /**
