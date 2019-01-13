@@ -40,50 +40,67 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Class to provide language specific StopWord lists.
- * The stopword lists were extracted from 
- * <a href="http://snowball.tartarus.org/dist/snowball_all.tgz"> 
+ * Class to provide language specific StopWord lists. The stopword lists were
+ * extracted from
+ * <a href="http://snowball.tartarus.org/dist/snowball_all.tgz">
  * http://snowball.tartarus.org/dist/snowball_all.tgz </a>
- * The following languages are supported: Danish, Dutch, English,
- * Finnish, French, German, Hungarian, Italian, Norwegian, Portuguese
- * Russian, Spanish, and Swedish.
+ * The following languages are supported: Danish, Dutch, English, Finnish,
+ * French, German, Hungarian, Italian, Norwegian, Portuguese Russian, Spanish,
+ * and Swedish.
+ *
  * @author Paul Wolfgang
  */
 public class StopWord {
 
     Set<String> wordList = new HashSet<>();
-    
+
     /**
-     * Initialize the wordList with the selected language.
-     * If no language is provided, or if the language is "true", then the
-     * default list is the one provided by Chris Buckley and Gerard Salton 
-     * at Cornell University.  If the language is "false" or "0", then
-     * no StopWord filtering is performed.  
-     * @param language 
+     * Initialize the wordList with the selected language. If no language is
+     * provided, or if the language is "true", then the default list is the one
+     * provided by Chris Buckley and Gerard Salton at Cornell University. If the
+     * language is "false" or "0", then no StopWord filtering is performed.
+     *
+     * @param language
      */
     public StopWord(String language) {
         String path;
-        if (language == null || language.isEmpty()) path = "META-INF/StopWordList.txt";
-        else if ("true".equalsIgnoreCase(language)) path = "META-INF/StopWordList.txt";
-        else if ("false".equalsIgnoreCase(language)) path = null;
-        else if ("0".equalsIgnoreCase(language)) path = null;
-        else path = "META-INF/stoplists/" + language + "/stop.txt";
+        if (language == null || language.isEmpty()) {
+            path = "META-INF/StopWordList.txt";
+        } else {
+            language = language.toLowerCase();
+            switch (language) {
+                case "true":
+                    path = "META-INF/StopWordList.txt";
+                    break;
+                case "false":
+                    path = null;
+                    break;
+                case "0":
+                    path = null;
+                    break;
+                default:
+                    path = "META-INF/stoplists/" + language + "/stop.txt";
+                    break;
+            }
+        }
         InputStream is = null;
-        if (path != null) is = ClassLoader.getSystemResourceAsStream(path);
+        if (path != null) {
+            is = ClassLoader.getSystemResourceAsStream(path);
+        }
         if (is != null) {
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             br.lines()
-              .map(l -> l.split("\\s*\\|\\s*"))
-              .map(Arrays::stream)
-              .map(s -> s.findFirst())
-              .map(o -> o.orElse(""))
-              .filter(s -> !s.isEmpty())
-              .map(s -> s.split("\\s+"))
-              .flatMap(Arrays::stream)
-              .forEach(w -> wordList.add(w));
+                    .map(l -> l.split("\\s*\\|\\s*"))
+                    .map(Arrays::stream)
+                    .map(s -> s.findFirst())
+                    .map(o -> o.orElse(""))
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> s.split("\\s+"))
+                    .flatMap(Arrays::stream)
+                    .forEach(w -> wordList.add(w));
         }
     }
-    
+
     public boolean isStopWord(String word) {
         return wordList.contains(word.trim());
     }
