@@ -44,7 +44,8 @@ import java.util.Objects;
 import java.util.SortedMap;
 import java.util.StringJoiner;
 import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class to encapsulate the vocabulary
@@ -52,7 +53,7 @@ import org.apache.log4j.Logger;
  */
 public class Vocabulary implements Serializable {
     
-    private static final Logger LOGGER = Logger.getLogger(Vocabulary.class);
+    private static final Logger LOGGER = Logger.getLogger(Vocabulary.class.getCanonicalName());
 
     /** List of word probabilities indexed by word id */
     private final ArrayList<Double> allWords;
@@ -167,7 +168,7 @@ public class Vocabulary implements Serializable {
         try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
             vocab.forEach((k, v) -> pw.printf(format, k,v));
         } catch (IOException ioex) {
-            LOGGER.error("Error writing vocabulary", ioex);
+            LOGGER.log(Level.SEVERE, "Error writing vocabulary", ioex);
             System.err.printf("Error writing vocabulary %s%n", ioex.getMessage());
             System.exit(1);
         }

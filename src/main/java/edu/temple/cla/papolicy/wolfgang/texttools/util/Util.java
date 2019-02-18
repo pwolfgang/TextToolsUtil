@@ -48,8 +48,9 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
-import org.apache.log4j.Logger;
 
 /**
  * Class to contain static utility methods
@@ -58,7 +59,7 @@ import org.apache.log4j.Logger;
  */
 public class Util {
 
-    private static final Logger LOGGER = Logger.getLogger(Util.class);
+    private static final Logger LOGGER = Logger.getLogger(Util.class.getCanonicalName());
     private static final double LOGE2 = Math.log(2.0);
     private static final Map<Character, String> XML_CHAR_MAP = new HashMap<>();
     private static final Map<String, Character> XML_CODE_MAP = new HashMap<>();
@@ -100,7 +101,7 @@ public class Util {
                 }
             });
         } catch (Exception ex) {
-            LOGGER.error("Error reading from file", ex);
+            LOGGER.log(Level.SEVERE, "Error reading from file", ex);
             System.err.printf("Error reading from file %s%n", ex.getMessage());
             System.exit(1);
         }
@@ -202,7 +203,7 @@ public class Util {
                     .filter(evenOddFilter)
                     .map(doComputeMajor);
         } catch (Exception ex) { // Want to catch unchecked exceptions as well
-            LOGGER.error("Error reading from database", ex);
+            LOGGER.log(Level.SEVERE, "Error reading from database", ex);
             System.err.printf("Error reading from database %s%n", ex.getMessage());
             throw new RuntimeException("Error reading from database", ex);
         }

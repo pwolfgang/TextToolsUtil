@@ -1,6 +1,5 @@
-module TextToolsUtil {
-    requires StemmerFactory;
-    requires log4j;
+module edu.temple.cla.papolicy.wolfgang.TextToolsUtil {
+    requires edu.temple.cla.papolicy.wolfgang.StemmerFactory;
 
     requires transitive java.logging;
     requires transitive java.sql;
