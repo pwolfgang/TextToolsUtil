@@ -60,7 +60,7 @@ public class StopWord {
      * provided by Chris Buckley and Gerard Salton at Cornell University. If the
      * language is "false" or "0", then no StopWord filtering is performed.
      *
-     * @param language
+     * @param language The selected language.
      */
     public StopWord(String language) {
         String path;

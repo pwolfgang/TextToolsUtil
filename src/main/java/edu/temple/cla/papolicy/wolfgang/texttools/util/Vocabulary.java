@@ -67,7 +67,9 @@ public class Vocabulary implements Serializable {
     /** Flag to indicate that new words are not to be entered into the vocabulary */
     private boolean frozen = false;
     
-    /** Construct a Vocabulary from a WordCounter */
+    /** Construct a Vocabulary from a WordCounter
+     * @param counter The WordCounter to accumulate the count of words.
+     */
     public Vocabulary(WordCounter counter) {
         allWords = new ArrayList<>();
         allWords.add(0.0); // there is no word zero

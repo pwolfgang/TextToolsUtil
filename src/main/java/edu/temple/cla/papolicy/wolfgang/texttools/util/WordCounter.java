@@ -74,7 +74,7 @@ public class WordCounter implements Serializable {
 
     /**
      * Update the counts for each word in another counter.
-     * @param wordCounter 
+     * @param wordCounter The other WordCounter
      */
     public void updateCounts(WordCounter wordCounter) {
         wordCounter.wordMap.forEach((w, c) -> {
