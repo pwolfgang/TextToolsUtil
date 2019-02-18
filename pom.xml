@@ -64,7 +64,7 @@
         <dependency>
             <groupId>edu.temple.cla.papolicy.wolfgang</groupId>
             <artifactId>StemmerFactory</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.1-J11</version>
         </dependency>
     </dependencies>
     <build>

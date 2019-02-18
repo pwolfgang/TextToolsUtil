@@ -5,6 +5,7 @@ module edu.temple.cla.papolicy.wolfgang.TextToolsUtil {
     requires transitive java.sql;
 
     exports edu.temple.cla.papolicy.wolfgang.texttools.util;
+    opens edu.temple.cla.papolicy.wolfgang.texttools.util;
     exports picocli;
 
 }
