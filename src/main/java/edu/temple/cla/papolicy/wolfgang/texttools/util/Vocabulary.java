@@ -50,6 +50,7 @@ import org.apache.log4j.Logger;
  * Class to encapsulate the vocabulary
  * @author Paul Wolfgang
  */
+@SuppressWarnings("serial")
 public class Vocabulary implements Serializable {
     
     private static final Logger LOGGER = Logger.getLogger(Vocabulary.class);
@@ -60,14 +61,12 @@ public class Vocabulary implements Serializable {
     private final  Map<String, Integer> wordIds;
     /** List of word indexed by word id */
     private final List<String> idWords;
-
+   
     /** WordCounter to accumulate the count of the words */
     private final WordCounter counter;
-    
-    /** Flag to indicate that new words are not to be entered into the vocabulary */
-    private boolean frozen = false;
-    
-    /** Construct a Vocabulary from a WordCounter */
+       
+    /** Construct a Vocabulary from a WordCounter
+     * @param counter The WordCounter source for the Vocabulary.*/
     public Vocabulary(WordCounter counter) {
         allWords = new ArrayList<>();
         allWords.add(0.0); // there is no word zero
@@ -86,20 +85,6 @@ public class Vocabulary implements Serializable {
         });
     }
 
-    /** Method to compute the probability of each word the vocabulary.
-     * After this method is called, the vocabulary is frozen.
-     */
-    public void computeProbabilities() {
-        if (!frozen) {
-            frozen = true;
-            allWords.ensureCapacity(idWords.size());
-            for (int i = 1; i < idWords.size(); i++) {
-                String word = idWords.get(i);
-                allWords.add(counter.getProb(word));
-            }
-        }
-    }
-    
     /** Method to return the wordID of a word 
      * @param word The word
      * @return The wordID if in the vocabulary, null otherwise
