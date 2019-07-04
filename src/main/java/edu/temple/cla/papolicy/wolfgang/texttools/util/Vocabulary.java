@@ -37,6 +37,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +154,45 @@ public class Vocabulary implements Serializable {
             LOGGER.error("Error writing vocabulary", ioex);
             System.err.printf("Error writing vocabulary %s%n", ioex.getMessage());
             System.exit(1);
+        }
+    }
+
+    /**
+     * Method to output the Vocabulary in reverse probability order.
+     * Output is of the form &lt;probability&gt; %lt;word&gt; 
+     * @param fileName The name of the file to which the
+     * Vocabulary is written.
+     */
+    public void writeFeatures(String fileName) {
+        List<Feature> features = new ArrayList<>();
+        wordIds.forEach((word, id) -> {
+           double prob = getWordProb(id);
+           features.add(new Feature(prob, word));
+         });
+        features.sort(Comparator.naturalOrder());
+        try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
+            features.forEach(pw::println); 
+        } catch (IOException ioex) {
+            LOGGER.error("Error writing vocabulary", ioex);
+            System.err.printf("Error writing featurs %s%n", ioex.getMessage());
+            System.exit(1);
+        }
+    }
+    
+    private class Feature implements Comparable<Feature> {
+        public Double probability;
+        public String word;
+        public Feature(Double probability, String word) {
+            this.probability = probability;
+            this.word = word;
+        }
+        @Override
+        public int compareTo(Feature other) {
+            return Double.compare(this.probability, other.probability);
+        }
+        @Override
+        public String toString() {
+            return String.format("%.6f : %s", probability, word);
         }
     }
     
