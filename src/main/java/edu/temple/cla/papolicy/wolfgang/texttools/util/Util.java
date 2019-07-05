@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 
@@ -126,10 +127,11 @@ public class Util {
             String textColumn,
             String codeColumn,
             boolean computeMajor,
+            boolean excluedNull,
             boolean useEven,
             boolean useOdd) {
         return readFromDatabase (datasource, tableName, idColumn, textColumn, 
-                codeColumn, computeMajor, useEven, useOdd, null);
+                codeColumn, computeMajor, excluedNull, useEven, useOdd, null);
     }
     
     /**
@@ -154,6 +156,7 @@ public class Util {
             String textColumn,
             String codeColumn,
             boolean computeMajor,
+            boolean excludeNull,
             boolean useEven,
             boolean useOdd,
             String clusterColumn) {
@@ -191,15 +194,24 @@ public class Util {
             if (computeMajor) {
                 doComputeMajor = (m -> {
                     Integer code = (Integer) m.get("theCode");
-                    if (code == null) code = 0;
+                    if (code == null) return m;
                     m.put("theCode", code / 100);
                     return m;
                 });
             } else {
                 doComputeMajor = (m -> m);
             }
+            Predicate<Map<String, Object>> doExcludeNull;
+            if (excludeNull) {
+                doExcludeNull = m -> m.get("theCode") != null;
+            } else {
+                doExcludeNull = m -> true;
+            }
             return dbStream.of(query)
+                    .filter(m -> m.get("theText") != null)
+                    .filter(m -> !"".equals(m.get("theText")))
                     .filter(evenOddFilter)
+                    .filter(doExcludeNull)
                     .map(doComputeMajor);
         } catch (Exception ex) { // Want to catch unchecked exceptions as well
             LOGGER.error("Error reading from database", ex);

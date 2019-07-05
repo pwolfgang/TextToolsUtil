@@ -67,13 +67,14 @@ public class Preprocessor {
      */
     public Stream<String> preprocess(String line) {
         if (line != null) {
-        return NOT_WORD.splitAsStream(line)
+        return NOT_WORD.splitAsStream(Util.convertFromXML(line))
                 .filter(w -> !w.isEmpty())
                 .map(String::toLowerCase)
                 .map(this::stripSingleQuotes)
                 .filter(w -> !w.isEmpty())
                 .filter(w -> !stopWord.isStopWord(w))
                 .map(stemmer)
+                .map(this::stripSingleQuotes)
                 .filter(w -> !w.isEmpty());
         } else {
             return Stream.empty();

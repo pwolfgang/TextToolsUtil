@@ -73,6 +73,9 @@ public class CommonFrontEnd {
 
     @Option(names = "--compute_major", description = "Major code is computed from minor code")
     private Boolean computeMajor = false;
+    
+    @Option(names = "--exclude_null", description = "Exclude rows with a null code")
+    private Boolean excludeNull = false;
 
     @Option(names = "--remove_stopwords", arity = "0..1", description = "Remove common \"stop words\" from the text.")
     private String removeStopWords;
@@ -98,6 +101,7 @@ public class CommonFrontEnd {
                 textColumn,
                 codeColumn,
                 computeMajor,
+                excludeNull,
                 useEven,
                 useOdd)
                 .forEach(m -> {
@@ -111,7 +115,7 @@ public class CommonFrontEnd {
                                            counts.merge("TOTAL_WORDS", 1.0, Double::sum);
                             });
                     m.put("counts", new WordCounter(counts));
-                    m.remove("theText");
+//                    m.remove("theText");
                     theData.add(m);
                 });
         return new Vocabulary(new WordCounter(vocabCounts));
