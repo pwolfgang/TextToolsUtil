@@ -144,6 +144,7 @@ public class Util {
      * @param textColumn The column(s) containing the text
      * @param codeColumn The column containing the code
      * @param clusterColumn The column containing the cluster history
+     * @param excludeNull If true, rows with a null code value are filtered out.
      * @param computeMajor If true, the major code is computed
      * @param useEven If true, even samples are returned
      * @param useOdd If true, odd samples are returned
