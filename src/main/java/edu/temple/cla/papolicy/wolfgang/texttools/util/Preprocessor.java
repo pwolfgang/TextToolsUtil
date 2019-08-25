@@ -33,6 +33,7 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import edu.temple.cla.papolicy.wolfgang.stemmer.Stemmer;
 import edu.temple.cla.papolicy.wolfgang.stemmer.StemmerFactory;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -54,6 +55,10 @@ public class Preprocessor {
     public Preprocessor(String stemmerLanguage, String stopWordLanguage) {
         stemmer = StemmerFactory.getInstance(stemmerLanguage);
         stopWord = new StopWord(stopWordLanguage);
+        System.out.printf("stemmerLanguage: %s stemmer: %s%n", 
+                Objects.toString(stemmerLanguage), Objects.toString(stemmer));
+        System.out.printf("stopWordLanguage: %s stopWord: %s%n",
+                Objects.toString(stopWordLanguage), Objects.toString(stopWord));
     }
 
     /**

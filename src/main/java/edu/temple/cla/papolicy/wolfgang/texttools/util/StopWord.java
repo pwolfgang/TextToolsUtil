@@ -63,7 +63,7 @@ public class StopWord {
      */
     public StopWord(String language) {
         String path;
-        if (language == null || language.isEmpty()) {
+        if (language == null || language.isEmpty() || language.startsWith("--")) {
             path = "META-INF/StopWordList.txt";
         } else {
             language = language.toLowerCase();

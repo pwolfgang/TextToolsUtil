@@ -36,10 +36,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -439,6 +443,16 @@ public class Util {
             return ois.readObject();
         } catch (ClassNotFoundException | IOException ioex) {
             throw new RuntimeException("Error reading " + inputFile.getPath(), ioex);
+        }
+    }
+    
+    public static void copySourceFile(InputStream ins, File outFile) {
+        try (
+            BufferedReader in = new BufferedReader(new InputStreamReader(ins));
+            PrintWriter out = new PrintWriter(new FileWriter(outFile))) {
+                in.lines().forEach(out::println);
+        } catch (IOException ioex) {
+            throw new UncheckedIOException(ioex);
         }
     }
 
