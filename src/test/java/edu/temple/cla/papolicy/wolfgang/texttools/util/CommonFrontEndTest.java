@@ -34,7 +34,6 @@ package edu.temple.cla.papolicy.wolfgang.texttools.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import org.junit.Test;
 import picocli.CommandLine;
 
@@ -52,7 +51,7 @@ public class CommonFrontEndTest {
         TestDatabase.createTestTable();
         CommonFrontEnd commonFrontEnd = new CommonFrontEnd();
         CommandLine commandLine = new CommandLine(commonFrontEnd);
-        commandLine.parse("--datasource", "TestDb.txt",
+        commandLine.parse("--datasource", "MockDB.txt",
                 "--table_name", "TestTable",
                 "--id_column", "ID",
                 "--text_column", "Abstract",

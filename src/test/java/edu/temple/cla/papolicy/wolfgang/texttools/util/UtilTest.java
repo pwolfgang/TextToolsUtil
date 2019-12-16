@@ -70,7 +70,7 @@ public class UtilTest {
         System.out.println("testReadFromDatabaseMajorCode");
         TestDatabase.createTestTable();
         List<Map<String, Object>> result = new ArrayList<>();
-        Util.readFromDatabase("TestDb.txt", "TestTable", "ID", "Abstract", "Code", true, false, false)
+        Util.readFromDatabase("MockDB.txt", "TestTable", "ID", "Abstract", "Code", true, false, false)
                 .forEach(m -> result.add(m));
         assertEquals(TestDatabase.buildExpectedResultMajorCode(), result);
     }
@@ -80,7 +80,7 @@ public class UtilTest {
         System.out.println("testReadFromDatabaseCode");
         TestDatabase.createTestTable();
         List<Map<String, Object>> result = new ArrayList<>();
-        Util.readFromDatabase("TestDb.txt", "TestTable", "ID", "Abstract", "Code", false, false, false)
+        Util.readFromDatabase("MockDB.txt", "TestTable", "ID", "Abstract", "Code", false, false, false)
                 .forEach(m -> result.add(m));
         assertEquals(TestDatabase.buildExpectedResultMinorCode(), result);
     }

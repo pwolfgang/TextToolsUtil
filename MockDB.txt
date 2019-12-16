@@ -1,0 +1,5 @@
+jdbc.driver:	edu.temple.cla.policydb.mockdatabase.MockDriver
+jdbc.url:	jdbc:mockdb/mockTestDB
+jdbc.username:	paul
+jdbc.password:	secret
+

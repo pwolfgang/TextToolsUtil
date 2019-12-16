@@ -31,7 +31,6 @@
  */
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
-import edu.temple.cla.papolicy.wolfgang.texttools.util.StopWord;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

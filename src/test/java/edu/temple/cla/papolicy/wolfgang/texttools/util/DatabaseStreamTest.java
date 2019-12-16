@@ -58,7 +58,7 @@ public class DatabaseStreamTest {
     @Test
     public void testOf() {
         try {
-            DataSource ds = new SimpleDataSource("TestDb.txt");
+            DataSource ds = new SimpleDataSource("MockDB.txt");
             DatabaseStream dbStream = new DatabaseStream(ds);
             String query = "SELECT ID, Abstract, Code from TestTable";
             List<Map<String, Object>> result = new ArrayList<>();
