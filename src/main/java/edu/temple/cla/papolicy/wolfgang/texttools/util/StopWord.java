@@ -32,11 +32,12 @@
 package edu.temple.cla.papolicy.wolfgang.texttools.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -88,8 +89,9 @@ public class StopWord {
             is = ClassLoader.getSystemResourceAsStream(path);
         }
         if (is != null) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is));){
             br.lines()
+                    .filter(l -> !l.startsWith("#"))
                     .map(l -> l.split("\\s*\\|\\s*"))
                     .map(Arrays::stream)
                     .map(s -> s.findFirst())
@@ -98,6 +100,9 @@ public class StopWord {
                     .map(s -> s.split("\\s+"))
                     .flatMap(Arrays::stream)
                     .forEach(w -> wordList.add(w));
+            } catch (IOException ioex) {
+                throw new UncheckedIOException(ioex);
+            }
         }
     }
 

@@ -88,7 +88,6 @@ public class StopWordTest {
     public void testIsStopWord2() {
         System.out.println("isStopWord2");
         String word = "arf";
-        boolean expResult = false;
         boolean result = stopWord.isStopWord(word);
         assertFalse("'arf' is not a stopword", result);
     }
@@ -117,5 +116,16 @@ public class StopWordTest {
             new StopWord(language);
         }
     }
+    
+    /**
+     * Verify that lines beginning with '#' are skipped.
+     */
+    @Test
+    public void testIsStopWord() {
+        StopWord stopWord = new StopWord(null);
+        assertTrue(stopWord.isStopWord("and"));
+        assertFalse(stopWord.isStopWord("Buckley"));
+    }  
+
     
 }
