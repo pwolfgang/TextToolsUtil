@@ -113,7 +113,12 @@ public class StopWordTest {
         "swedish"    
         };
         for (String language : languages) {
-            new StopWord(language);
+            var stopWd = new StopWord(language);
+            System.out.println(language);
+            stopWd.wordList.stream()
+                    .limit(2)
+                    .forEach(System.out::println);
+            System.out.println();
         }
     }
     

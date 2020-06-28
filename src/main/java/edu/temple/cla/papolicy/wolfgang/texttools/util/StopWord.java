@@ -37,7 +37,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,7 +56,30 @@ import java.util.Set;
 public class StopWord {
 
     Set<String> wordList = new HashSet<>();
-
+    private static final Map<String, String> charsetNames;
+    
+    static {
+    String[][] charSetNamesArray = {
+        {"danish", "ISO-8859-4"},
+        {"dutch",  "ISO-8859-1"},
+        {"english", "ISO-8859-1"},
+        {"french", "ISO-8859-1"},
+        {"finnish", "ISO-8859-13"},
+        {"german", "ISO-8859-2"},
+        {"hungarian", "ISO-8859-2"},
+        {"italian", "ISO-8859-1"},
+        {"norwegian", "ISO-8859-1"},
+        {"portuguese", "ISO-8859-1"},
+        {"russian", "ISO-8859-5"},
+        {"spanish", "ISO-8859-1"},
+        {"swedish", "ISO-8859-4"}};
+        charsetNames = new HashMap<>();
+        for (var namePair : charSetNamesArray) {
+            charsetNames.put(namePair[0], namePair[1]);
+        }
+        
+    }
+    
     /**
      * Initialize the wordList with the selected language. If no language is
      * provided, or if the language is "true", then the default list is the one
@@ -65,22 +90,28 @@ public class StopWord {
      */
     public StopWord(String language) {
         String path;
+        String charsetName;
         if (language == null || language.isEmpty()) {
             path = "META-INF/StopWordList.txt";
+            charsetName = "ISO-8859-1";
         } else {
             language = language.toLowerCase();
             switch (language) {
                 case "true":
                     path = "META-INF/StopWordList.txt";
+                    charsetName = "ISO-8859-1";
                     break;
                 case "false":
                     path = null;
+                    charsetName = null;
                     break;
                 case "0":
                     path = null;
+                    charsetName = null;
                     break;
                 default:
                     path = "META-INF/stoplists/" + language + "/stop.txt";
+                    charsetName = charsetNames.get(language);
                     break;
             }
         }
@@ -89,7 +120,7 @@ public class StopWord {
             is = ClassLoader.getSystemResourceAsStream(path);
         }
         if (is != null) {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(is));){
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is, charsetName));){
             br.lines()
                     .filter(l -> !l.startsWith("#"))
                     .map(l -> l.split("\\s*\\|\\s*"))
@@ -100,8 +131,8 @@ public class StopWord {
                     .map(s -> s.split("\\s+"))
                     .flatMap(Arrays::stream)
                     .forEach(w -> wordList.add(w));
-            } catch (IOException ioex) {
-                throw new UncheckedIOException(ioex);
+            } catch (Exception ioex) {
+                throw new RuntimeException(language + " " + charsetName, ioex);
             }
         }
     }
